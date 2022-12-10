@@ -7,3 +7,6 @@ The plan:
 - [Open Source Authority](https://github.com/NickCarducci/mastercard-backbank-digital-ocean-app)
 
 - bro down
+
+>git clone https://github.com/plaid/quickstart.git
+>[cd quickstart/node](https://plaid.com/docs/quickstart/#quickstart-setup)
