@@ -1,21 +1,20 @@
 require("dotenv").config();
 
 const {
-    getFirestore,
-    getDoc,
-    doc,
-    updateDoc,
-    addDoc,
-    increment,
-    setDoc
-  } = require("firebase/firestore/lite"),
-  { initializeApp, cert } = require("firebase/app"),
+  getDoc,
+  doc,
+  updateDoc,
+  addDoc,
+  increment,
+  setDoc
+} = require("firebase-admin/firestore"),// /light
+  { initializeApp, cert } = require("firebase-admin/app"),
   credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
   FIREBASE = initializeApp({
     credential,
     databaseURL: "https://vaumoney.firebaseio.com"
   }),
-  { getAuth, deleteUser } = require("firebase/auth"),
+  { getFirestore, getAuth, deleteUser } = require("firebase-admin/auth"),
   firestore = getFirestore(FIREBASE),
   port = 8080,
   allowedOrigins = [
@@ -151,21 +150,21 @@ issue
   }); //no use within a month so
 // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
 const writeCard = async (req, res, newStore, cb) =>
-    await stripe.paymentMethods
-      .create(newStore)
-      .then(async (method) => {
-        await stripe.paymentMethods
-          .attach(method.id, {
-            customer: req.body.customerId
-          })
-          .then(async (same) => {
-            cb(method.id);
-          })
-          .catch((e) =>
-            standardCatch(res, e, { newStore, method }, "attach card")
-          );
-      })
-      .catch((e) => standardCatch(res, e, newStore, "create card")),
+  await stripe.paymentMethods
+    .create(newStore)
+    .then(async (method) => {
+      await stripe.paymentMethods
+        .attach(method.id, {
+          customer: req.body.customerId
+        })
+        .then(async (same) => {
+          cb(method.id);
+        })
+        .catch((e) =>
+          standardCatch(res, e, { newStore, method }, "attach card")
+        );
+    })
+    .catch((e) => standardCatch(res, e, newStore, "create card")),
   //-pay -out "intent" deferred
   serializeCard = (req, cardId) => {
     return { req, cardId: !cardId ? req.body.storeId : cardId };
@@ -300,39 +299,39 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     person_token
   };
 };*/ const failOpening = (
-    req,
-    on
-  ) => {
-    return {
-      statusCode: 402,
-      statusText: "no storeId go " + on,
-      error: {
-        body: req.body,
-        query: req.query,
-        origin
-      }
-    };
-  },
+  req,
+  on
+) => {
+  return {
+    statusCode: 402,
+    statusText: "no storeId go " + on,
+    error: {
+      body: req.body,
+      query: req.query,
+      origin
+    }
+  };
+},
   cardOptions = (req) => {
     return {
       type: req.body.type, //"customer_balance"//"us_bank_account" "card"
       ...(req.body.type === "card"
         ? {
-            card: {
-              number: req.body.primary, //16-digit primary,
-              exp_month: req.body.exp_month, //no zero-digit padding
-              exp_year: req.body.exp_year,
-              cvc: req.body.security
-            }
-          } //newCard
+          card: {
+            number: req.body.primary, //16-digit primary,
+            exp_month: req.body.exp_month, //no zero-digit padding
+            exp_year: req.body.exp_year,
+            cvc: req.body.security
+          }
+        } //newCard
         : {
-            us_bank_account: {
-              account_holder_type: "company", //"individual"
-              account_number: req.body.account,
-              account_type: "checking", //"savings"
-              routing_number: req.body.routing
-            }
-          }), //newBank
+          us_bank_account: {
+            account_holder_type: "company", //"individual"
+            account_number: req.body.account,
+            account_type: "checking", //"savings"
+            routing_number: req.body.routing
+          }
+        }), //newBank
       billing_details: {
         address: req.body.address,
         email: req.body.email,
@@ -342,7 +341,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     };
   };
 const requirebody = (req, res) =>
-    !req.body && RESSEND(res, failOpening(req, "account")),
+  !req.body && RESSEND(res, failOpening(req, "account")),
   originbody = (req, res, body) => {
     var origin = req.query.origin;
     if (!origin) {
@@ -396,30 +395,30 @@ attach
      *
      */
     const prefixMap = async (
-        merchantSurnamePrefix = async (res) => {
-          const json = JSON.parse(res);
-          return json;
-        }
-      ) => {
-        const totalMerchantSurnames = await getDoc(
-          doc(firestore, "merchantSurnames", merchantSurnamePrefix)
-        )
-          .then((d) => {
-            (d.exists() ? updateDoc : setDoc)(
-              doc(firestore, "merchantSurnames", merchantSurnamePrefix),
-              { count: increment(-1) }
-            );
-            return { ...d.data(), id: d.id }.count + 1;
-          })
-          .catch((err) => {
-            console.log(
-              "deleted; surname update,set, or get failure: ",
-              err.message
-            );
-            return err;
-          });
-        return null;
-      },
+      merchantSurnamePrefix = async (res) => {
+        const json = JSON.parse(res);
+        return json;
+      }
+    ) => {
+      const totalMerchantSurnames = await getDoc(
+        doc(firestore, "merchantSurnames", merchantSurnamePrefix)
+      )
+        .then((d) => {
+          (d.exists() ? updateDoc : setDoc)(
+            doc(firestore, "merchantSurnames", merchantSurnamePrefix),
+            { count: increment(-1) }
+          );
+          return { ...d.data(), id: d.id }.count + 1;
+        })
+        .catch((err) => {
+          console.log(
+            "deleted; surname update,set, or get failure: ",
+            err.message
+          );
+          return err;
+        });
+      return null;
+    },
       deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
     req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
@@ -535,11 +534,11 @@ attach
                   "person",
                   stripe.accounts.createPerson,
                   (acct.id,
-                  {
-                    first_name: req.body.first,
-                    last_name: req.body.last,
-                    person_token: person.account_token
-                  })
+                    {
+                      first_name: req.body.first,
+                      last_name: req.body.last,
+                      person_token: person.account_token
+                    })
                 );
                 if (!person_.id) {
                   error = "person";
@@ -550,9 +549,9 @@ attach
                   "update",
                   stripe.accounts.update,
                   (acct.id,
-                  {
-                    account_token: companyAccount.account_token
-                  })
+                    {
+                      account_token: companyAccount.account_token
+                    })
                 );
                 if (!acct_.id) {
                   error = "update";
@@ -724,7 +723,7 @@ const payout = async (req, res, cb, name) => {
   const b = req.body,
     method =
       (b.currency === "usd" && b.stripeId === "card") ||
-      (b.curreny === "gbp" && b.stripeId === "ach_debit")
+        (b.curreny === "gbp" && b.stripeId === "ach_debit")
         ? "instant"
         : "standard";
   await stripe.payouts
@@ -757,7 +756,7 @@ disburse
         statusText: "not a secure origin-referer-to-host protocol"
       });
     //https://stripe.com/docs/api/payouts/create
-    payout((req, null), res, () => {}, "payout");
+    payout((req, null), res, () => { }, "payout");
   })
   .post("/degrade", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -818,7 +817,7 @@ fill
       });
     writeCard(req, res, cardOptions(req), (cardId) => {
       //https://stripe.com/docs/api/payouts/create
-      payout((req, cardId), res, () => {}, "create payout"); //newPayout
+      payout((req, cardId), res, () => { }, "create payout"); //newPayout
     });
   });
 
@@ -898,9 +897,9 @@ report
       });
     //https://stripe.com/docs/search#search-query-language
     const serialize = (array) =>
-        array.map(
-          (kv) => `${Object.keys(kv)[0]}:\\'${Object.values(kv)[0]}\\'`
-        ),
+      array.map(
+        (kv) => `${Object.keys(kv)[0]}:\\'${Object.values(kv)[0]}\\'`
+      ),
       query = req.body.terms
         .map(
           (kv) =>
