@@ -1,14 +1,12 @@
 require("dotenv").config();
 
-const {
-    getFirestore,
-    getDoc,
-    doc,
-    updateDoc,
-    addDoc,
-    increment,
-    setDoc
-  } = require("firebase/firestore/lite"), // /lite
+const { initializeApp, cert } = require("firebase-admin/app"),
+  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
+  FIREBASEAUTH = initializeApp({
+    credential,
+    databaseURL: "https://vaumoney.firebaseio.com"
+  }),
+  { getAuth, deleteUser } = require("firebase-admin/auth"),
   firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
     authDomain: "vaumoney.firebaseapp.com",
@@ -20,14 +18,16 @@ const {
   },
   firebase = initializeApp(firebaseConfig),
   //"Cannot access 'initializeApp' before initialization"
+  {
+    getFirestore,
+    getDoc,
+    doc,
+    updateDoc,
+    addDoc,
+    increment,
+    setDoc
+  } = require("firebase/firestore/lite"), // /lite
   FIREBASE = getFirestore(firebase),
-  { initializeApp, cert } = require("firebase-admin/app"),
-  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
-  FIREBASEAUTH = initializeApp({
-    credential,
-    databaseURL: "https://vaumoney.firebaseio.com"
-  }),
-  { getAuth, deleteUser } = require("firebase-admin/auth"),
   firestore = getFirestore(FIREBASE),
   port = 8080,
   allowedOrigins = [
