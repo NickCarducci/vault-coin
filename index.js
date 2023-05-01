@@ -15,7 +15,7 @@ const {
     credential,
     databaseURL: "https://vaumoney.firebaseio.com"
   }),
-  { getAuth, deleteUser } = require("firebase-admin/auth"),
+  { getAuth, deleteUser } = require("firebase/auth"),
   firestore = getFirestore(FIREBASE),
   port = 8080,
   allowedOrigins = [
