@@ -2,12 +2,29 @@ require("dotenv").config();
 
 const { initializeApp, cert } = require("firebase-admin/app"),
   credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
-  FIREBASEAUTH = initializeApp({
-    credential,
-    databaseURL: "https://vaumoney.firebaseio.com"
-  }, "FIREBASEAUTH"),
-  { getAuth, deleteUser } = require("firebase-admin/auth"),
-  firebaseConfig = {
+  { getAuth, deleteUser } = require("firebase-admin/auth");
+/*FIREBASEAUTH = initializeApp(
+    {
+      credential,
+      databaseURL: "https://vaumoney.firebaseio.com"
+    },
+    "FIREBASEAUTH"
+  ),*/
+
+class FIREBASEAUTH {
+  constructor() {
+    this.firebaseAoo = initializeApp(
+      {
+        credential,
+        databaseURL: "https://vaumoney.firebaseio.com"
+      },
+      "FIREBASEAUTH"
+    );
+  }
+  defaultAuth = getAuth(this.firebaseAoo);
+  defaultAuth = deleteUser(this.firebaseAoo);
+}
+const firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
     authDomain: "vaumoney.firebaseapp.com",
     databaseURL: "https://vaumoney.firebaseio.com",
