@@ -7,10 +7,21 @@ const { getFirestore,
   addDoc,
   increment,
   setDoc
-} = require("firebase-admin/firestore"),// /light
+} = require("firebase/firestore/lite"),// /lite
+  firebaseConfig = {
+    apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
+    authDomain: "vaumoney.firebaseapp.com",
+    databaseURL: "https://vaumoney.firebaseio.com",
+    projectId: "vaumoney",
+    storageBucket: "vaumoney.appspot.com",
+    messagingSenderId: "580465804476",
+    appId: "1:580465804476:web:5fe118607e434910683cb9"
+  },
+  app = initializeApp(firebaseConfig),
+  FIREBASE = getFirestore(app),
   { initializeApp, cert } = require("firebase-admin/app"),
   credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
-  FIREBASE = initializeApp({
+  FIREBASEAUTH = initializeApp({
     credential,
     databaseURL: "https://vaumoney.firebaseio.com"
   }),
@@ -834,7 +845,7 @@ database.post("/deleteemail", async (req, res) => {
       delete auth.email;
       delete auth.emailVerified;
       delete auth.password;
-      await getAuth(FIREBASE)
+      await getAuth(FIREBASEAUTH)
         .createUser(auth)
         .then((w) =>
           RESSEND(res, {
