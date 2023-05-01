@@ -18,7 +18,9 @@ const {
     messagingSenderId: "580465804476",
     appId: "1:580465804476:web:5fe118607e434910683cb9"
   },
-  FIREBASE = getFirestore(initializeApp(firebaseConfig)),
+  firebase = initializeApp(firebaseConfig),
+  //"Cannot access 'initializeApp' before initialization"
+  FIREBASE = getFirestore(firebase),
   { initializeApp, cert } = require("firebase-admin/app"),
   credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
   FIREBASEAUTH = initializeApp({
