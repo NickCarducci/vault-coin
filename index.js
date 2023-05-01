@@ -5,7 +5,7 @@ const { initializeApp, cert } = require("firebase-admin/app"),
   FIREBASEAUTH = initializeApp({
     credential,
     databaseURL: "https://vaumoney.firebaseio.com"
-  }),
+  }, "FIREBASEAUTH"),
   { getAuth, deleteUser } = require("firebase-admin/auth"),
   firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
@@ -16,7 +16,7 @@ const { initializeApp, cert } = require("firebase-admin/app"),
     messagingSenderId: "580465804476",
     appId: "1:580465804476:web:5fe118607e434910683cb9"
   },
-  firebase = initializeApp(firebaseConfig),
+  firebase = initializeApp(firebaseConfig, "firebase"),
   //"Cannot access 'initializeApp' before initialization"
   {
     getFirestore,
