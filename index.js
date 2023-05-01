@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const {
+const { getFirestore,
   getDoc,
   doc,
   updateDoc,
@@ -14,7 +14,7 @@ const {
     credential,
     databaseURL: "https://vaumoney.firebaseio.com"
   }),
-  { getFirestore, getAuth, deleteUser } = require("firebase-admin/auth"),
+  { getAuth, deleteUser } = require("firebase-admin/auth"),
   firestore = getFirestore(FIREBASE),
   port = 8080,
   allowedOrigins = [
