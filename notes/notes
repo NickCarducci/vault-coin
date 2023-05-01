@@ -1,0 +1,86 @@
+
+    /*
+      (let) Producer price (p) $100 (NOL)
+      Interest rate (r) = p/(carry-forward term)
+      Brokerage subscription p*r
+      */
+    //https://stripe.com/docs/api/metadata
+    //const annual = req.body.loan / req.body.carryForwardYears;
+    //const pric = 50000 / 5; carryForwardYears 5 20%, 10 10%
+    //interest (on a cash basis?); const rat = pric / 50000;
+    /*metadata: {
+          loan: true
+        }*/ /*metadata: {
+          annual,
+          rate: annual / principal //'annual' price as in annual interest return, not
+          //a "trade". "specify up to 50 keys, with key names up to
+          //40 char[] long and values up to 500 characters long." consulting to
+          //work beyond already linkable work ELSEWHERE disclosed for marketing
+        }*/ //(M-1 Tax Asset?)
+    /*const newFee = {
+        customer: req.body.stripeId,
+        payment_method: req.body.storeId,
+        amount: subscription, //2000,
+        currency: req.body.currency ? req.body.currency : "usd"
+      };*/
+
+
+            //Can't utility leisure be recollected as a
+            //material rate of change exclusively always alone while
+            //utility expense can also be represented as an
+            //absolute material number?
+
+            //whenever to report interest by state or sole proprietorship
+          //Are businesses and individuals protected from usury and
+          //warranty consumer fraud when they exchange nonsale advances for
+          //wages W2 or self-reported 1099-K?
+            //Do you think the physiological purpose, genealogical cause, and
+            //covalent effect of viruses is a zombie pandemic or
+            //cardiological atherosclerosis?
+
+            //Does the covid pandemic prove zombie apocalypses are possible or are
+            //testing sectionals either too invariant or covalent to
+            //confirm such the nefarious evolution causal hypothesis over
+            //antibodies suspending viruses to stop personal atherosclerosis?
+
+             //by account (like /loan, which by total spending is a
+        //tax asset by interest or if usury law state but for perhaps sole proprietors, 80%)
+        //nothing special about that listing
+
+
+            //Can I not get a job because of my personality,
+            //I'm not applying enough, or my ideology against taking credit as income?
+            //https://stripe.com/docs/issuing/cards
+
+
+      //Do you need to use the current bank charters established thus far that
+      //lend your deposits in operations in order to save with a
+      //safe deposit box or FedCash?
+      //cash advance (anyway)
+
+        /*
+    Are usury rates prohibited to protect bystanders from 
+    surrendered customer labor opportunities or prevent shareholder loans from 
+    getting a full deduction for instead a 80% NOL? Can’t the 
+    lender mark up the purchase to duct pay from principal anyway?
+  
+    Why do usury consumer protection legislators want to declassify 
+    interest as principal?
+     */
+
+
+    //'/transfers' by account customer and destination
+    //pay, nay - claim item deduction Schedule C / 1125-a
+    //paying back (windfall principal) entertainment, convenience, non-primary home:
+    //100% (further-wise, concurrently) deductible
+    //- all interest (non-probate/warranty?) by
+    //carryForwardYears = (1/eternal_interest) * loan
+    const principal = req.body.loan;
+    //const annual = req.body.loan / req.body.carryForwardYears;
+    //const pric = 50000 / 5; carryForwardYears 5 20%, 10 10%
+    //interest (on a cash basis?); const rat = pric / 50000;
+
+
+    //capital loss $3k/yr, such as Are [the Fed] not acting in a fiduciary fashion?
+    //[], is the Fed taking out funds before maturity below par or
+    //did this [capital loss] appear for a lack of volume on bid making price?
