@@ -1,31 +1,6 @@
 require("dotenv").config();
 
-const { initializeApp: initApp, cert } = require("firebase-admin/app"),
-  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
-  { getAuth, deleteUser } = require("firebase-admin/auth");
-/*FIREBASEAUTH = initializeApp(
-    {
-      credential,
-      databaseURL: "https://vaumoney.firebaseio.com"
-    },
-    "FIREBASEAUTH"
-  ),*/
-
-class FIREBASEAUTH {
-  constructor() {
-    this.firebaseAoo = initApp(
-      {
-        credential,
-        databaseURL: "https://vaumoney.firebaseio.com"
-      }
-      //"FIREBASEAUTH"
-    );
-  }
-  defaultAuth = getAuth(this.firebaseAoo);
-  defaultAuth = deleteUser(this.firebaseAoo);
-}
-const firebaseauth = new FIREBASEAUTH(),
-  firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
     authDomain: "vaumoney.firebaseapp.com",
     databaseURL: "https://vaumoney.firebaseio.com",
@@ -47,7 +22,32 @@ const firebaseauth = new FIREBASEAUTH(),
     setDoc
   } = require("firebase/firestore/lite"), // /lite
   firestore = getFirestore(firebase),
-  port = 8080,
+  { initializeApp: initApp, cert } = require("firebase-admin/app"),
+  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
+  { getAuth, deleteUser } = require("firebase-admin/auth");
+/*FIREBASEAUTH = initializeApp(
+    {
+      credential,
+      databaseURL: "https://vaumoney.firebaseio.com"
+    },
+    "FIREBASEAUTH"
+  ),*/
+
+class FIREBASEAUTH {
+  constructor() {
+    this.firebaseAoo = initApp /*
+      {
+        credential,
+        databaseURL: "https://vaumoney.firebaseio.com"
+      }*/();
+    //"The default Firebase app does not exist."
+    //https://stackoverflow.com/a/62890190/11711280
+    //"FIREBASEAUTH"
+  }
+  defaultAuth = getAuth(this.firebaseAoo);
+  defaultAuth = deleteUser(this.firebaseAoo);
+}
+const port = 8080,
   allowedOrigins = [
     "https://sausage.saltbank.org",
     "https://i7l8qe.csb.app",
@@ -116,7 +116,8 @@ const firebaseauth = new FIREBASEAUTH(),
   actions = express.Router(),
   database = express.Router(),
   cors = require("cors"),
-  stripe = require("stripe")(process.env.STRIPE_SECRET); //https://dashboard.stripe.com/account/apikeys
+  stripe = require("stripe")(process.env.STRIPE_SECRET),
+  firebaseauth = new FIREBASEAUTH(); //https://dashboard.stripe.com/account/apikeys
 
 //catches ctrl+c event
 process.on("SIGINT", exitHandler.bind(null, { exit: true }));
