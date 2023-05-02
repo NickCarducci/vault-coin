@@ -443,11 +443,11 @@ attach
       }*/
     ) => {
       //const totalMerchantSurnames =
-      await getDoc(doc(firestore, "merchantSurnames", merchantSurnamePrefix))
+      /*await getDoc(doc(firestore, "merchantSurnames", merchantSurnamePrefix))
         .then((d) => {
           (d.exists() ? updateDoc : setDoc)(
             doc(firestore, "merchantSurnames", merchantSurnamePrefix),
-            { count: increment(-1) }
+            { count: increment(1) }
           );
           return { ...d.data(), id: d.id }.count + 1;
         })
@@ -458,8 +458,8 @@ attach
           );
           return err;
         });
-      return null;
-    };
+      return null;*/
+    }; //Just do on front end
     req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
       prefixMap(merchantSurnamePrefix);
     });
