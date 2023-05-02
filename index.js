@@ -426,6 +426,11 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
+    return res.send({
+      statusCode,
+      statusText,
+      why: "no work"
+    });
     /**
      * Decrement merchantSurnamePrefix count
      *
