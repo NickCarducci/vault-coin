@@ -421,6 +421,11 @@ attach
     //declared in the Node.js process' scope?
     var origin = originbody(req, res, true);
     allowOriginType(origin, res);
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      progress: "yet to surname factor digit counts.."
+    });
     /**
      * Decrement merchantSurnamePrefix count
      *
