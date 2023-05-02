@@ -610,7 +610,9 @@ attach
                 const ich = await /*promiseCatcher(
                   r,
                   "cardholder",*/
-                stripe.issuing.cardholders.create(cardholder);
+                stripe.issuing.cardholders
+                  .create(cardholder)
+                  .catch((e) => r(`{error:${JSON.stringify(e)}}`));
                 if (!ich.id) {
                   error = "cardholder";
                   return r(`{error:${error}}`);
