@@ -426,64 +426,61 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
-    return res.send({
+    /*return res.send({
       statusCode,
       statusText,
       why: "no work"
-    });
+    });*/
     /**
      * Decrement merchantSurnamePrefix count
      *
      *
      */
     const prefixMap = async (
-        merchantSurnamePrefix = async (res) => {
-          const json = JSON.parse(res);
-          return json;
-        }
-      ) => {
-        const totalMerchantSurnames = await getDoc(
-          doc(firestore, "merchantSurnames", merchantSurnamePrefix)
-        )
-          .then((d) => {
-            (d.exists() ? updateDoc : setDoc)(
-              doc(firestore, "merchantSurnames", merchantSurnamePrefix),
-              { count: increment(-1) }
-            );
-            return { ...d.data(), id: d.id }.count + 1;
-          })
-          .catch((err) => {
-            console.log(
-              "deleted; surname update,set, or get failure: ",
-              err.message
-            );
-            return err;
-          });
-        return null;
-      },
-      deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
-
+      merchantSurnamePrefix /* = async (res) => {
+        const json = JSON.parse(res);
+        return json;
+      }*/
+    ) => {
+      //const totalMerchantSurnames =
+      await getDoc(doc(firestore, "merchantSurnames", merchantSurnamePrefix))
+        .then((d) => {
+          (d.exists() ? updateDoc : setDoc)(
+            doc(firestore, "merchantSurnames", merchantSurnamePrefix),
+            { count: increment(-1) }
+          );
+          return { ...d.data(), id: d.id }.count + 1;
+        })
+        .catch((err) => {
+          console.log(
+            "deleted; surname update,set, or get failure: ",
+            err.message
+          );
+          return err;
+        });
+      return null;
+    };
     req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
       prefixMap(merchantSurnamePrefix);
     });
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       progress: "beyond surname factor digit counts"
-    });
+    });*/
     /**
      * Delete accounts
      *
      *
      */
-    const deletethisone = async (x) => {
+    /*const deletethisone = async (x) => {
       await new Promise((r) =>
         stripe.accounts.del(x).then(async () => {
           r("{}");
         })
       );
-    };
-
+    };*/
+    const deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
     deleteThese &&
       deleteThese.constructor === Array &&
       Promise.all(
@@ -508,11 +505,11 @@ attach
           console.log("delete error: ", err.message);
           return err;
         });
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       progress: "beyond sinking customers / deletion accounts"
-    });
+    });*/
     /* Don't delete customers
     
     const sinkThese = req.body.sinkThese; // []; //sandbox only! ("cus_")
@@ -529,7 +526,7 @@ attach
             RESSEND(res, failOpening(req, "customer"));
           }
         });*/
-    RESSEND(res, { statusCode, statusText, status: "declared deleter" });
+    //RESSEND(res, { statusCode, statusText, status: "declared deleter" });
     //"Sorry, you're creating accounts too quickly. You should
     //limit your requests to less than 5 creation attempts per
     //second with a test key, or less than 30 with a live key."
@@ -549,7 +546,7 @@ attach
       req.body.accounts.map(
         async (_acct, i) =>
           await new Promise(async (r, reject) => {
-            RESSEND(res, { statusCode, statusText, status: "ran deleter" });
+            //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
             //dangerous; assumes one: storeId-kv (without newAccount field)
             if (!_acct.newAccount) return r(`{id:${Object.values(_acct)[0]}}`); //RESSEND(res,);
             const name = _acct.newAccount.business_profile.mcc,
@@ -646,7 +643,7 @@ attach
             return RESSEND(res, failOpening(req, error));
           //if (error) return null;
           error = null;
-          RESSEND(res, { statusCode, statusText, status: "made accounts" });
+          //RESSEND(res, { statusCode, statusText, status: "made accounts" });
           /**
            * Begin process link
            *
