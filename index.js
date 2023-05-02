@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { initializeApp, cert } = require("firebase-admin/app"),
+const { initializeApp: initApp, cert } = require("firebase-admin/app"),
   credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
   { getAuth, deleteUser } = require("firebase-admin/auth");
 /*FIREBASEAUTH = initializeApp(
@@ -13,18 +13,19 @@ const { initializeApp, cert } = require("firebase-admin/app"),
 
 class FIREBASEAUTH {
   constructor() {
-    this.firebaseAoo = initializeApp(
+    this.firebaseAoo = initApp(
       {
         credential,
         databaseURL: "https://vaumoney.firebaseio.com"
-      },
-      "FIREBASEAUTH"
+      }
+      //"FIREBASEAUTH"
     );
   }
   defaultAuth = getAuth(this.firebaseAoo);
   defaultAuth = deleteUser(this.firebaseAoo);
 }
-const firebaseConfig = {
+const firebaseauth = new FIREBASEAUTH(),
+  firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
     authDomain: "vaumoney.firebaseapp.com",
     databaseURL: "https://vaumoney.firebaseio.com",
@@ -33,7 +34,8 @@ const firebaseConfig = {
     messagingSenderId: "580465804476",
     appId: "1:580465804476:web:5fe118607e434910683cb9"
   },
-  firebase = initializeApp(firebaseConfig, "firebase"),
+  { initializeApp } = require("firebase/app"),
+  firebase = initializeApp(firebaseConfig), //, "firebase"),
   //"Cannot access 'initializeApp' before initialization"
   {
     getFirestore,
@@ -44,8 +46,7 @@ const firebaseConfig = {
     increment,
     setDoc
   } = require("firebase/firestore/lite"), // /lite
-  FIREBASE = getFirestore(firebase),
-  firestore = getFirestore(FIREBASE),
+  firestore = getFirestore(firebase),
   port = 8080,
   allowedOrigins = [
     "https://sausage.saltbank.org",
@@ -864,7 +865,7 @@ database.post("/deleteemail", async (req, res) => {
       delete auth.email;
       delete auth.emailVerified;
       delete auth.password;
-      await getAuth(FIREBASEAUTH)
+      await getAuth(firebaseauth)
         .createUser(auth)
         .then((w) =>
           RESSEND(res, {
