@@ -531,10 +531,15 @@ attach
     //limit your requests to less than 5 creation attempts per
     //second with a test key, or less than 30 with a live key."
     var error = null;
-    const promiseCatcher = async (r, reason, call, args) =>
-      await call(args).catch((e) =>
-        r(`{error:${JSON.stringify(e)},reason:${reason}}`)
-      );
+    const promiseCatcher = async (R, reason, call, args) =>
+      new Promise(async (r) => {
+        await call(args)
+          .then((res) => {
+            const done = JSON.stringify(res);
+            r(done);
+          })
+          .catch((e) => R(`{error:${JSON.stringify(e)},reason:${reason}}`));
+      });
     /**
      * Begin process accounts and customer creation
      *
