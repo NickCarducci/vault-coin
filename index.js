@@ -91,7 +91,6 @@ const port = 8080,
     });
   },
   allowOriginType = (origin, res) => {
-    if (!res.secure) return true;
     res.setHeader("Access-Control-Allow-Origin", origin);
     //allowedOrigins[allowedOrigins.indexOf(origin)]
     res.setHeader("Content-Type", "Application/JSON");
@@ -103,6 +102,7 @@ const port = 8080,
       "Access-Control-Request-Headers"
     ]);
     res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
+    if (!res.secure) return true;
     //https://stackoverflow.com/questions/12027187/difference-between-allow-and-access-control-allow-methods-in-http-response-h
   },
   fetch = require("node-fetch"),
