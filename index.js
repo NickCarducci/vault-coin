@@ -116,8 +116,8 @@ const port = 8080,
   actions = express.Router(),
   database = express.Router(),
   cors = require("cors"),
-  stripe = require("stripe")(process.env.STRIPE_SECRET),
-  firebaseauth = new FIREBASEAUTH(); //https://dashboard.stripe.com/account/apikeys
+  stripe = require("stripe")(process.env.STRIPE_SECRET);
+//FIREBASEAUTH = FIREBASEAUTH.toSource(); //https://dashboard.stripe.com/account/apikeys
 
 //catches ctrl+c event
 process.on("SIGINT", exitHandler.bind(null, { exit: true }));
@@ -866,7 +866,7 @@ database.post("/deleteemail", async (req, res) => {
       delete auth.email;
       delete auth.emailVerified;
       delete auth.password;
-      await getAuth(firebaseauth)
+      await getAuth(FIREBASEAUTH)
         .createUser(auth)
         .then((w) =>
           RESSEND(res, {
