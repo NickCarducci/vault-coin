@@ -420,12 +420,12 @@ attach
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
     var origin = originbody(req, res, true);
-    allowOriginType(origin, res);
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      progress: "yet to surname factor digit counts.."
-    });
+    if (allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
     /**
      * Decrement merchantSurnamePrefix count
      *
