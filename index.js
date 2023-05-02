@@ -532,7 +532,7 @@ attach
     //second with a test key, or less than 30 with a live key."
     var error = null;
     const promiseCatcher = async (r, reason, call, args) =>
-      await call(...args).catch((e) =>
+      await call(args).catch((e) =>
         r(`{error:${JSON.stringify(e)},reason:${reason}}`)
       );
     /**
