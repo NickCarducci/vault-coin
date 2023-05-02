@@ -17,9 +17,8 @@ const firebaseConfig = {
     getDoc,
     doc,
     updateDoc,
-    addDoc,
-    increment,
-    setDoc
+    setDoc,
+    increment
   } = require("firebase/firestore/lite"), // /lite
   firestore = getFirestore(firebase),
   { initializeApp: initApp, cert } = require("firebase-admin/app"),
@@ -607,22 +606,22 @@ attach
                   error = "customer";
                   return r(`{error:${error}}`);
                 }
-                const ich = await /*promiseCatcher(
+                /*const ich = await /*promiseCatcher(
                   r,
-                  "cardholder",*/
+                  "cardholder",* /
                 stripe.issuing.cardholders
                   .create(cardholder)
                   .catch((e) => r(`{error:${JSON.stringify(e)}}`));
                 if (!ich.id) {
                   error = "cardholder";
                   return r(`{error:${error}}`);
-                }
+                }*/
                 const store = JSON.stringify({
                   invoice_prefix: customer.invoice_prefix,
                   name,
                   id: acct_.id,
-                  customerId: cus.id,
-                  cardholderId: ich.id
+                  customerId: cus.id
+                  //cardholderId: ich.id
                   //accountLink
                 });
                 return store && r(store);
@@ -702,12 +701,12 @@ attach
                   const digits = String(store.name).substring(0, 2),
                     link = `stripe${digits}Link`,
                     id = `stripe${digits}Id`,
-                    customer = `customer${digits}Id`,
-                    cardholder = `cardholder${digits}Id`;
+                    customer = `customer${digits}Id`;
+                  //cardholder = `cardholder${digits}Id`;
                   kv[link] = store.accountLink;
                   kv[id] = store.id;
                   kv[customer] = store.customerId;
-                  kv[cardholder] = store.cardholderId;
+                  //kv[cardholder] = store.cardholderId;
                   kv.invoice_prefix = store.invoice_prefix;
                   return kv;
                 });
@@ -716,7 +715,7 @@ attach
                     keyvalue[key] = store[key];
                   });
                 });
-                (d.exists() ? updateDoc : addDoc)(
+                (d.exists() ? updateDoc : setDoc)(
                   doc(firestore, "userDatas", req.body.uid),
                   keyvalue
                 )
