@@ -531,7 +531,7 @@ attach
     //limit your requests to less than 5 creation attempts per
     //second with a test key, or less than 30 with a live key."
     var error = null;
-    const promiseCatcher = async (R, reason, call, args) =>
+    /*const promiseCatcher = async (R, reason, call, args) =>
       new Promise(async (r) => {
         await call(args)
           .then((res) => {
@@ -539,7 +539,7 @@ attach
             r(done);
           })
           .catch((e) => R(`{error:${JSON.stringify(e)},reason:${reason}}`));
-      });
+      });*/
     /**
      * Begin process accounts and customer creation
      *
@@ -555,11 +555,13 @@ attach
             //dangerous; assumes one: storeId-kv (without newAccount field)
             if (!_acct.newAccount) return r(`{id:${Object.values(_acct)[0]}}`); //RESSEND(res,);
             const name = _acct.newAccount.business_profile.mcc,
-              acct = await promiseCatcher(r, "create", stripe.accounts.create, {
-                type: _acct.type,
-                country: _acct.country,
-                ..._acct.newAccount
-              });
+              acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create(
+                {
+                  type: _acct.type,
+                  country: _acct.country,
+                  ..._acct.newAccount
+                }
+              );
             if (!acct.id) {
               error = "account";
               return r(`{error:${error}}`);
@@ -573,50 +575,42 @@ attach
                 cardholder
               } = _acct) => {
                 if (error) return r(`{error:${error}}`);
-                const person_ = await promiseCatcher(
+                const person_ = await /*promiseCatcher(
                   r,
-                  "person",
-                  stripe.accounts.createPerson,
-                  (acct.id,
-                  {
-                    first_name: req.body.first,
-                    last_name: req.body.last,
-                    person_token: person.account_token
-                  })
-                );
+                  "person",*/
+                stripe.accounts.createPerson(acct.id, {
+                  first_name: req.body.first,
+                  last_name: req.body.last,
+                  person_token: person.account_token
+                });
+
                 if (!person_.id) {
                   error = "person";
                   return r(`{error:${error}}`);
                 }
-                const acct_ = await promiseCatcher(
+                const acct_ = await /*promiseCatcher(
                   r,
-                  "update",
-                  stripe.accounts.update,
-                  (acct.id,
-                  {
-                    account_token: companyAccount.account_token
-                  })
-                );
+                  "update",*/
+                stripe.accounts.update(acct.id, {
+                  account_token: companyAccount.account_token
+                });
+
                 if (!acct_.id) {
                   error = "update";
                   return r(`{error:${error}}`);
                 }
-                const cus = await promiseCatcher(
+                const cus = await /*promiseCatcher(
                   r,
-                  "customer",
-                  stripe.customers.create,
-                  customer
-                );
+                  "customer",*/
+                stripe.customers.create(customer);
                 if (!cus.id) {
                   error = "customer";
                   return r(`{error:${error}}`);
                 }
-                const ich = await promiseCatcher(
+                const ich = await /*promiseCatcher(
                   r,
-                  "cardholder",
-                  stripe.issuing.cardholders.create,
-                  cardholder
-                );
+                  "cardholder",*/
+                stripe.issuing.cardholders.create(cardholder);
                 if (!ich.id) {
                   error = "cardholder";
                   return r(`{error:${error}}`);
@@ -663,19 +657,18 @@ attach
                   mccIdTimeouts[store.id] = setTimeout(
                     async () => {
                       if (error) return r(`{error:${error}}`);
-                      const accLink = promiseCatcher(
+                      const accLink =
+                        /*promiseCatcher(
                         r,
-                        "accountLink",
-                        stripe.accountLinks.create,
-                        {
+                        "accountLink",*/
+                        stripe.accountLinks.create({
                           account: store.id, //: 'acct_1032D82eZvKYlo2C',
                           return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
                           refresh_url: `https://vault-co.in/join?account=${store.id}&origin=${origin}`, //account.id
                           //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
                           //collect: "eventually_due"
                           type: "account_onboarding"
-                        }
-                      );
+                        });
                       if (!accLink) {
                         error = "accountLink";
                         return r(`{error:${error}}`);
