@@ -628,12 +628,7 @@ attach
             }
             mccIdTimeoutNames.push(name);
             mccIdTimeouts[name] = setTimeout(
-              async ({
-                person,
-                companyAccount,
-                customer,
-                cardholder
-              } = _acct) => {
+              async ({ person, companyAccount } = _acct) => {
                 if (error) return r(`{error:${error}}`);
                 const person_ = await /*promiseCatcher(
                   r,
@@ -675,7 +670,7 @@ attach
       )
     )
       .then((a) => {
-        RESSEND(res, { statusCode, statusText, account: JSON.parse(a) });
+        RESSEND(res, { statusCode, statusText, account: a });
         return a.map((st, i) => {
           const p = JSON.parse(st);
           return p;
