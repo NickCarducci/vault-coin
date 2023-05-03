@@ -674,141 +674,128 @@ attach
           })
       )
     )
-      .then(
-        async (
-          accounts = (a) =>
-            a.map((st, i) => {
-              const p = JSON.parse(st);
-              return p;
-            })
-        ) => {
-          if (!accounts.every((x) => x.constructor === Object && !x.error))
-            return RESSEND(res, failOpening(req, error));
-          //if (error) return null;
-          error = null;
-          //RESSEND(res, { statusCode, statusText, status: "made accounts" });
-          /**
-           * Begin process link
-           *
-           *
-           */
-          return RESSEND(res, failOpening(req, "before linking"));
-          await Promise.all(
-            accounts.map(
-              async (store, i) =>
-                //return await new Promise((r) => r(String(obj)));
-                await new Promise((r, reject) => {
-                  mccIdTimeoutNames.push(store.id);
-                  mccIdTimeouts[store.id] = setTimeout(
-                    async () => {
-                      if (error) return r(`{error:${error}}`);
-                      const accLink =
-                        /*promiseCatcher(
+      .then((a) => {
+        RESSEND(res, { statusCode, statusText, account: JSON.parse(a) });
+        return a.map((st, i) => {
+          const p = JSON.parse(st);
+          return p;
+        });
+      })
+      .then(async (accounts) => {
+        if (!accounts.every((x) => x.constructor === Object && !x.error))
+          return RESSEND(res, failOpening(req, error));
+        //if (error) return null;
+        error = null;
+        //RESSEND(res, { statusCode, statusText, status: "made accounts" });
+        /**
+         * Begin process link
+         *
+         *
+         */
+        return RESSEND(res, failOpening(req, "before linking"));
+        await Promise.all(
+          accounts.map(
+            async (store, i) =>
+              //return await new Promise((r) => r(String(obj)));
+              await new Promise((r, reject) => {
+                mccIdTimeoutNames.push(store.id);
+                mccIdTimeouts[store.id] = setTimeout(
+                  async () => {
+                    if (error) return r(`{error:${error}}`);
+                    const accLink =
+                      /*promiseCatcher(
                         r,
                         "accountLink",*/
-                        await stripe.accountLinks.create({
-                          account: store.id, //: 'acct_1032D82eZvKYlo2C',
-                          return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
-                          refresh_url: `https://vault-co.in/join?account=${store.id}&origin=${origin}`, //account.id
-                          //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
-                          //collect: "eventually_due"
-                          type: "account_onboarding"
-                        });
-                      if (!accLink) {
-                        error = "accountLink";
-                        return r(`{error:${error}}`);
-                      }
-                      lastLink = accLink.url;
-                      //name, id, customerId, cardholderId
-                      store.accountLink = accLink;
-                      const account = store && JSON.stringify(store);
-                      return account && r(account);
-                    },
-                    error ? 0 : 5000 * i
-                  );
-                })
-            )
-          )
-            .then(
-              (
-                accounts = (a) =>
-                  a.map((st, i) => {
-                    const y = JSON.parse(st);
-                    return y;
-                  })
-              ) => {
-                //const subscriptionId = subscription();
-                if (
-                  !accounts.every((x) => x.constructor === Object && !x.error)
-                )
-                  return RESSEND(res, failOpening(req, error));
-                /**
-                 * Begin process update userDatas with key-value object
-                 *
-                 *
-                 */
-                getDoc(doc(firestore, "userDatas", req.body.uid))
-                  .then((d) => {
-                    var keyvalue = {};
-                    accounts = accounts.map((store) => {
-                      var kv = {};
-                      const digits = String(store.name).substring(0, 2),
-                        link = `stripe${digits}Link`,
-                        id = `stripe${digits}Id`;
-                      //customer = `customer${digits}Id`,
-                      //cardholder = `cardholder${digits}Id`;
-                      kv[link] = store.accountLink;
-                      kv[id] = store.id;
-                      //kv[customer] = store.customerId;
-                      //kv[cardholder] = store.cardholderId;
-                      //kv.invoice_prefix = store.invoice_prefix;
-                      return kv;
-                    });
-                    accounts.forEach((store) => {
-                      Object.keys(store).forEach((key) => {
-                        keyvalue[key] = store[key];
+                      await stripe.accountLinks.create({
+                        account: store.id, //: 'acct_1032D82eZvKYlo2C',
+                        return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
+                        refresh_url: `https://vault-co.in/join?account=${store.id}&origin=${origin}`, //account.id
+                        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
+                        //collect: "eventually_due"
+                        type: "account_onboarding"
                       });
+                    if (!accLink) {
+                      error = "accountLink";
+                      return r(`{error:${error}}`);
+                    }
+                    lastLink = accLink.url;
+                    //name, id, customerId, cardholderId
+                    store.accountLink = accLink;
+                    const account = store && JSON.stringify(store);
+                    return account && r(account);
+                  },
+                  error ? 0 : 5000 * i
+                );
+              })
+          )
+        )
+          .then(
+            (
+              accounts = (a) =>
+                a.map((st, i) => {
+                  const y = JSON.parse(st);
+                  return y;
+                })
+            ) => {
+              //const subscriptionId = subscription();
+              if (!accounts.every((x) => x.constructor === Object && !x.error))
+                return RESSEND(res, failOpening(req, error));
+              /**
+               * Begin process update userDatas with key-value object
+               *
+               *
+               */
+              getDoc(doc(firestore, "userDatas", req.body.uid))
+                .then((d) => {
+                  var keyvalue = {};
+                  accounts = accounts.map((store) => {
+                    var kv = {};
+                    const digits = String(store.name).substring(0, 2),
+                      link = `stripe${digits}Link`,
+                      id = `stripe${digits}Id`;
+                    //customer = `customer${digits}Id`,
+                    //cardholder = `cardholder${digits}Id`;
+                    kv[link] = store.accountLink;
+                    kv[id] = store.id;
+                    //kv[customer] = store.customerId;
+                    //kv[cardholder] = store.cardholderId;
+                    //kv.invoice_prefix = store.invoice_prefix;
+                    return kv;
+                  });
+                  accounts.forEach((store) => {
+                    Object.keys(store).forEach((key) => {
+                      keyvalue[key] = store[key];
                     });
-                    (d.exists() ? updateDoc : setDoc)(
-                      doc(firestore, "userDatas", req.body.uid),
-                      keyvalue
-                    )
-                      .then(() => {
-                        RESSEND(res, {
-                          statusCode,
-                          statusText: "successful accountLink",
-                          accounts
-                        });
-                      })
-                      .catch((e) =>
-                        standardCatch(
-                          res,
-                          e,
-                          {},
-                          "firestore store id (then callback)"
-                        )
-                      ); //plaidLink payouts account.details_submitted;
-                  })
-                  .catch((e) =>
-                    standardCatch(
-                      res,
-                      e,
-                      {},
-                      "firestore store id (get callback)"
-                    )
-                  );
-              }
-            )
-            .catch((e) =>
-              standardCatch(
-                res,
-                e,
-                { accounts },
-                "accountLinks (then callback)"
-              )
-            );
-        }
-      )
+                  });
+                  (d.exists() ? updateDoc : setDoc)(
+                    doc(firestore, "userDatas", req.body.uid),
+                    keyvalue
+                  )
+                    .then(() => {
+                      RESSEND(res, {
+                        statusCode,
+                        statusText: "successful accountLink",
+                        accounts
+                      });
+                    })
+                    .catch((e) =>
+                      standardCatch(
+                        res,
+                        e,
+                        {},
+                        "firestore store id (then callback)"
+                      )
+                    ); //plaidLink payouts account.details_submitted;
+                })
+                .catch((e) =>
+                  standardCatch(res, e, {}, "firestore store id (get callback)")
+                );
+            }
+          )
+          .catch((e) =>
+            standardCatch(res, e, { accounts }, "accountLinks (then callback)")
+          );
+      })
       .catch((e) => standardCatch(res, e, {}, "accounts (then callback)"));
     //return res.redirect(accountLink.url);
   });
