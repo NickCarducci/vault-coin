@@ -410,13 +410,21 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
 
+    const cus = await /*promiseCatcher(
+        r,
+        "customer",*/
+    stripe.customers.create(req.body.customer);
+    if (!cus.id) {
+      return RESSEND(req, failOpening(req, "customer"));
+    }
     const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
-    stripe.issuing.cardholders.create(req.body.customer);
+    stripe.issuing.cardholders.create(req.body.cardholder);
     if (!ich.id) {
-      return RESSEND(req, failOpening(req, "customer"));
+      return RESSEND(req, failOpening(req, "cardholder"));
     }
+    RESSEND(req, { statusCode, statusText, customer: cus, cardholder: ich });
   })
   /*.post("/assess", async (req, res) => {
     //assessment (the) paymentMethod "link" to account
@@ -613,19 +621,11 @@ attach
                   error = "update";
                   return r(`{error:${error}}`);
                 }
-                const cus = await /*promiseCatcher(
-                  r,
-                  "customer",*/
-                stripe.customers.create(customer);
-                if (!cus.id) {
-                  error = "customer";
-                  return r(`{error:${error}}`);
-                }
                 const store = JSON.stringify({
-                  invoice_prefix: customer.invoice_prefix,
+                  //invoice_prefix: customer.invoice_prefix,
                   name,
-                  id: acct_.id,
-                  customerId: cus.id
+                  id: acct_.id
+                  //customerId: cus.id
                   //cardholderId: ich.id
                   //accountLink
                 });
@@ -705,12 +705,12 @@ attach
                   var kv = {};
                   const digits = String(store.name).substring(0, 2),
                     link = `stripe${digits}Link`,
-                    id = `stripe${digits}Id`,
-                    customer = `customer${digits}Id`;
+                    id = `stripe${digits}Id`;
+                  //customer = `customer${digits}Id`,
                   //cardholder = `cardholder${digits}Id`;
                   kv[link] = store.accountLink;
                   kv[id] = store.id;
-                  kv[customer] = store.customerId;
+                  //kv[customer] = store.customerId;
                   //kv[cardholder] = store.cardholderId;
                   kv.invoice_prefix = store.invoice_prefix;
                   return kv;
