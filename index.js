@@ -687,14 +687,14 @@ attach
          *
          *
          */
-        return RESSEND(res, { statusCode, statusText, accounts });
+        //return RESSEND(res, { statusCode, statusText, accounts });
         await Promise.all(
           accounts.map(
             async (store, i) =>
               //return await new Promise((r) => r(String(obj)));
               await new Promise((r, reject) => {
-                mccIdTimeoutNames.push(store.id);
-                mccIdTimeouts[store.id] = setTimeout(
+                mccIdTimeoutNames.push(store.name);
+                mccIdTimeouts[store.name] = setTimeout(
                   async () => {
                     if (error) return r(`{error:${error}}`);
                     const accLink =
@@ -704,7 +704,7 @@ attach
                       await stripe.accountLinks.create({
                         account: store.id, //: 'acct_1032D82eZvKYlo2C',
                         return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
-                        refresh_url: `https://vault-co.in/join?account=${store.id}&origin=${origin}`, //account.id
+                        refresh_url: origin, //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
                         //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
                         //collect: "eventually_due"
                         type: "account_onboarding"
