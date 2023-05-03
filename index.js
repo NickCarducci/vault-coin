@@ -935,17 +935,24 @@ report
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    const account = await stripe.accounts.retrieve(
-      req.body.stripeId //acct
-    );
-    if (!account.id) return RESSEND(res, failOpening(req, "account"));
-    const customer = await stripe.customers.retrieve(req.body.customerId); //cus
-    if (!customer.id) return RESSEND(res, failOpening(req, "account"));
+    const account =
+      req.body.stripeId &&
+      (await stripe.accounts.retrieve(
+        req.body.stripeId //acct
+      ));
+    if (account && !account.id)
+      return RESSEND(res, failOpening(req, "account"));
+    const customer =
+      req.body.customerId &&
+      (await stripe.customers.retrieve(req.body.customerId)); //cus
+    if (customer && !customer.id)
+      return RESSEND(res, failOpening(req, "account"));
     //if (account.capabilities.card_issuing !== "inactive") {
-    const cardholder = await stripe.issuing.cardholders.retrieve(
-      req.body.cardholderId
-    ); //ich https://stripe.com/docs/issuing/connect/cardholders-and-cards
-    if (!cardholder.id) return RESSEND(res, failOpening(req, "account"));
+    const cardholder =
+      req.body.cardholderId &&
+      (await stripe.issuing.cardholders.retrieve(req.body.cardholderId)); //ich https://stripe.com/docs/issuing/connect/cardholders-and-cards
+    if (cardholder && !cardholder.id)
+      return RESSEND(res, failOpening(req, "account"));
 
     RESSEND(res, {
       statusCode,
