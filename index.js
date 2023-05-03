@@ -705,7 +705,7 @@ attach
                         /*promiseCatcher(
                         r,
                         "accountLink",*/
-                        stripe.accountLinks.create({
+                        await stripe.accountLinks.create({
                           account: store.id, //: 'acct_1032D82eZvKYlo2C',
                           return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
                           refresh_url: `https://vault-co.in/join?account=${store.id}&origin=${origin}`, //account.id
