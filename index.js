@@ -692,6 +692,7 @@ attach
            *
            *
            */
+          return RESSEND(res, failOpening(req, "before linking"));
           await Promise.all(
             accounts.map(
               async (store, i) =>
@@ -728,61 +729,76 @@ attach
                 })
             )
           )
-            .then((accounts = (a) => a.map((st, i) => JSON.parse(st))) => {
-              //const subscriptionId = subscription();
-              if (!accounts.every((x) => x.constructor === Object && !x.error))
-                return RESSEND(res, failOpening(req, error));
-              /**
-               * Begin process update userDatas with key-value object
-               *
-               *
-               */
-              getDoc(doc(firestore, "userDatas", req.body.uid))
-                .then((d) => {
-                  var keyvalue = {};
-                  accounts = accounts.map((store) => {
-                    var kv = {};
-                    const digits = String(store.name).substring(0, 2),
-                      link = `stripe${digits}Link`,
-                      id = `stripe${digits}Id`;
-                    //customer = `customer${digits}Id`,
-                    //cardholder = `cardholder${digits}Id`;
-                    kv[link] = store.accountLink;
-                    kv[id] = store.id;
-                    //kv[customer] = store.customerId;
-                    //kv[cardholder] = store.cardholderId;
-                    //kv.invoice_prefix = store.invoice_prefix;
-                    return kv;
-                  });
-                  accounts.forEach((store) => {
-                    Object.keys(store).forEach((key) => {
-                      keyvalue[key] = store[key];
+            .then(
+              (
+                accounts = (a) =>
+                  a.map((st, i) => {
+                    const y = JSON.parse(st);
+                    return y;
+                  })
+              ) => {
+                //const subscriptionId = subscription();
+                if (
+                  !accounts.every((x) => x.constructor === Object && !x.error)
+                )
+                  return RESSEND(res, failOpening(req, error));
+                /**
+                 * Begin process update userDatas with key-value object
+                 *
+                 *
+                 */
+                getDoc(doc(firestore, "userDatas", req.body.uid))
+                  .then((d) => {
+                    var keyvalue = {};
+                    accounts = accounts.map((store) => {
+                      var kv = {};
+                      const digits = String(store.name).substring(0, 2),
+                        link = `stripe${digits}Link`,
+                        id = `stripe${digits}Id`;
+                      //customer = `customer${digits}Id`,
+                      //cardholder = `cardholder${digits}Id`;
+                      kv[link] = store.accountLink;
+                      kv[id] = store.id;
+                      //kv[customer] = store.customerId;
+                      //kv[cardholder] = store.cardholderId;
+                      //kv.invoice_prefix = store.invoice_prefix;
+                      return kv;
                     });
-                  });
-                  (d.exists() ? updateDoc : setDoc)(
-                    doc(firestore, "userDatas", req.body.uid),
-                    keyvalue
-                  )
-                    .then(() => {
-                      RESSEND(res, {
-                        statusCode,
-                        statusText: "successful accountLink",
-                        accounts
+                    accounts.forEach((store) => {
+                      Object.keys(store).forEach((key) => {
+                        keyvalue[key] = store[key];
                       });
-                    })
-                    .catch((e) =>
-                      standardCatch(
-                        res,
-                        e,
-                        {},
-                        "firestore store id (then callback)"
-                      )
-                    ); //plaidLink payouts account.details_submitted;
-                })
-                .catch((e) =>
-                  standardCatch(res, e, {}, "firestore store id (get callback)")
-                );
-            })
+                    });
+                    (d.exists() ? updateDoc : setDoc)(
+                      doc(firestore, "userDatas", req.body.uid),
+                      keyvalue
+                    )
+                      .then(() => {
+                        RESSEND(res, {
+                          statusCode,
+                          statusText: "successful accountLink",
+                          accounts
+                        });
+                      })
+                      .catch((e) =>
+                        standardCatch(
+                          res,
+                          e,
+                          {},
+                          "firestore store id (then callback)"
+                        )
+                      ); //plaidLink payouts account.details_submitted;
+                  })
+                  .catch((e) =>
+                    standardCatch(
+                      res,
+                      e,
+                      {},
+                      "firestore store id (get callback)"
+                    )
+                  );
+              }
+            )
             .catch((e) =>
               standardCatch(
                 res,
