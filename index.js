@@ -526,21 +526,21 @@ attach
         })
       );
     };*/
-    var deleteThese = null; // req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
-    const developing = true;
-    var accounts =
-      developing &&
-      (await stripe.accounts.list({
-        limit: 24
-      }));
+    var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
+    /*const developing = true;
+    var accounts = null;
+    if (developing)
+      accounts = await stripe.accounts.list({
+        limit: 4
+      });
     if (accounts.url !== "/v1/accounts") {
       return RESSEND(res, {
         statusCode,
         statusText,
         accounts
       });
-    }
-    deleteThese = accounts.data;
+    }*/
+    //deleteThese = accounts.data;
     deleteThese &&
       deleteThese.constructor === Array &&
       Promise.all(
