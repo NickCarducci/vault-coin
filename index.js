@@ -762,7 +762,10 @@ attach
                     keyvalue[key] = store[key];
                   });
                 });
-                (d.exists() ? updateDoc : setDoc)(
+                return { keyvalue, exists: d.exists() };
+              })
+              .then(({ keyvalue, exists }) => {
+                (exists ? updateDoc : setDoc)(
                   doc(firestore, "userDatas", req.body.uid),
                   keyvalue
                 )
@@ -777,7 +780,7 @@ attach
                     standardCatch(
                       res,
                       e,
-                      { accts },
+                      { keyvalue },
                       "firestore store id (then callback)"
                     )
                   ); //plaidLink payouts account.details_submitted;
