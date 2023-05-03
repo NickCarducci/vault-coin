@@ -670,14 +670,14 @@ attach
       )
     )
       .then((a) => {
-        RESSEND(res, { statusCode, statusText, account: a });
+        //RESSEND(res, { statusCode, statusText, account: a });
         return a.map((st, i) => {
           const p = JSON.parse(st);
           return p;
         });
       })
       .then(async (accounts) => {
-        if (!accounts.every((x) => x.constructor === Object && !x.error))
+        if (!accounts.every((x) => x.constructor === Object || !x.error))
           return RESSEND(res, failOpening(req, error));
         //if (error) return null;
         error = null;
@@ -687,7 +687,7 @@ attach
          *
          *
          */
-        return RESSEND(res, failOpening(req, "before linking"));
+        return RESSEND(res, { statusCode, statusText, accounts });
         await Promise.all(
           accounts.map(
             async (store, i) =>
