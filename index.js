@@ -731,9 +731,9 @@ attach
               return p;
             });
           })
-          .then(async (accounts) => {
+          .then(async (accs) => {
             //const subscriptionId = subscription();
-            if (!accounts.every((x) => x.constructor === Object && !x.error))
+            if (!accs.every((x) => x.constructor === Object && !x.error))
               return RESSEND(res, failOpening(req, error));
             /**
              * Begin process update userDatas with key-value object
@@ -742,22 +742,22 @@ attach
              */
             getDoc(doc(firestore, "userDatas", req.body.uid))
               .then((d) => {
-                var keyvalue = {};
-                accounts = accounts.map((store) => {
-                  var kv = {};
-                  const digits = String(store.name).substring(0, 2),
-                    link = `stripe${digits}Link`,
-                    id = `stripe${digits}Id`;
-                  //customer = `customer${digits}Id`,
-                  //cardholder = `cardholder${digits}Id`;
-                  kv[link] = store.accountLink;
-                  kv[id] = store.id;
-                  //kv[customer] = store.customerId;
-                  //kv[cardholder] = store.cardholderId;
-                  //kv.invoice_prefix = store.invoice_prefix;
-                  return kv;
-                });
-                accounts.forEach((store) => {
+                var keyvalue = {},
+                  accts = accs.map((store) => {
+                    var kv = {};
+                    const digits = String(store.name).substring(0, 2),
+                      link = `stripe${digits}Link`,
+                      id = `stripe${digits}Id`;
+                    //customer = `customer${digits}Id`,
+                    //cardholder = `cardholder${digits}Id`;
+                    kv[link] = store.accountLink;
+                    kv[id] = store.id;
+                    //kv[customer] = store.customerId;
+                    //kv[cardholder] = store.cardholderId;
+                    //kv.invoice_prefix = store.invoice_prefix;
+                    return kv;
+                  });
+                accts.forEach((store) => {
                   Object.keys(store).forEach((key) => {
                     keyvalue[key] = store[key];
                   });
@@ -777,13 +777,18 @@ attach
                     standardCatch(
                       res,
                       e,
-                      {},
+                      { accts },
                       "firestore store id (then callback)"
                     )
                   ); //plaidLink payouts account.details_submitted;
               })
               .catch((e) =>
-                standardCatch(res, e, {}, "firestore store id (get callback)")
+                standardCatch(
+                  res,
+                  e,
+                  { accs },
+                  "firestore store id (get callback)"
+                )
               );
           })
           .catch((e) =>
