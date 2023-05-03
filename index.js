@@ -424,6 +424,30 @@ attach
     if (!ich.id) {
       return RESSEND(req, failOpening(req, "cardholder"));
     }
+
+    getDoc(doc(firestore, "userDatas", req.body.uid)).then((d) => {
+      var kv = {};
+      const digits = String(req.body.mcc).substring(0, 2),
+        customer = `customer${digits}Id`,
+        cardholder = `cardholder${digits}Id`;
+      kv[customer] = req.body.customerId;
+      kv[cardholder] = req.body.cardholderId;
+      //kv.invoice_prefix = store.invoice_prefix;
+      (d.exists() ? updateDoc : setDoc)(
+        doc(firestore, "userDatas", req.body.uid),
+        kv
+      )
+        .then(() => {
+          RESSEND(res, {
+            statusCode,
+            statusText: "successful accountLink",
+            kv
+          });
+        })
+        .catch((e) =>
+          standardCatch(res, e, {}, "firestore customer id (then callback)")
+        ); //plaidLink payouts account.details_submitted;
+    });
     RESSEND(req, { statusCode, statusText, customer: cus, cardholder: ich });
   })
   /*.post("/assess", async (req, res) => {
@@ -712,7 +736,7 @@ attach
                   kv[id] = store.id;
                   //kv[customer] = store.customerId;
                   //kv[cardholder] = store.cardholderId;
-                  kv.invoice_prefix = store.invoice_prefix;
+                  //kv.invoice_prefix = store.invoice_prefix;
                   return kv;
                 });
                 accounts.forEach((store) => {
@@ -905,7 +929,7 @@ const stripePage = ({ last, next } = (t) => t) => {
   };
 };
 report
-  .post("/stripe", async (req, res) => {
+  .post("/find", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
