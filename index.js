@@ -415,14 +415,14 @@ attach
         "customer",*/
     stripe.customers.create(req.body.customer);
     if (!cus.id) {
-      return RESSEND(req, failOpening(req, "customer"));
+      return RESSEND(res, failOpening(req, "customer"));
     }
     const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
     stripe.issuing.cardholders.create(req.body.cardholder);
     if (!ich.id) {
-      return RESSEND(req, failOpening(req, "cardholder"));
+      return RESSEND(res, failOpening(req, "cardholder"));
     }
 
     getDoc(doc(firestore, "userDatas", req.body.uid)).then((d) => {
@@ -448,7 +448,7 @@ attach
           standardCatch(res, e, {}, "firestore customer id (then callback)")
         ); //plaidLink payouts account.details_submitted;
     });
-    RESSEND(req, { statusCode, statusText, customer: cus, cardholder: ich });
+    RESSEND(res, { statusCode, statusText, customer: cus, cardholder: ich });
   })
   /*.post("/assess", async (req, res) => {
     //assessment (the) paymentMethod "link" to account
@@ -526,7 +526,21 @@ attach
         })
       );
     };*/
-    const deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
+    var deleteThese = null; // req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
+    const developing = true;
+    var accounts =
+      developing &&
+      (await stripe.accounts.list({
+        limit: 24
+      }));
+    if (accounts.url !== "/v1/accounts") {
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        accounts
+      });
+    }
+    deleteThese = accounts.data;
     deleteThese &&
       deleteThese.constructor === Array &&
       Promise.all(
