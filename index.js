@@ -403,6 +403,21 @@ attach
       pay((req, cardId), res, "pay")
     );
   })
+  .post("/buy", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+
+    const ich = await /*promiseCatcher(
+    r,
+    "cardholder",*/
+    stripe.issuing.cardholders.create(req.body.customer);
+    if (!ich.id) {
+      return RESSEND(req, failOpening(req, "customer"));
+    }
+  })
   /*.post("/assess", async (req, res) => {
     //assessment (the) paymentMethod "link" to account
     if (allowOriginType(req.headers.origin, res)) 
@@ -606,16 +621,6 @@ attach
                   error = "customer";
                   return r(`{error:${error}}`);
                 }
-                /*const ich = await /*promiseCatcher(
-                  r,
-                  "cardholder",* /
-                stripe.issuing.cardholders
-                  .create(cardholder)
-                  .catch((e) => r(`{error:${JSON.stringify(e)}}`));
-                if (!ich.id) {
-                  error = "cardholder";
-                  return r(`{error:${error}}`);
-                }*/
                 const store = JSON.stringify({
                   invoice_prefix: customer.invoice_prefix,
                   name,
