@@ -560,7 +560,7 @@ attach
           }*/
         )
       )
-        .then(prefixMap)
+        //.then(()=>{})//prefixMap
         .catch((err) => {
           console.log("delete error: ", err.message);
           return err;
