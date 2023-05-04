@@ -438,7 +438,7 @@ attach
         kv[cardholder] = req.body.cardholderId;
         //kv.invoice_prefix = store.invoice_prefix;
         (d.exists() ? updateDoc : setDoc)(
-          doc(firestore, "userDatas", req.body.uid),
+          doc(collection(firestore, "userDatas"), req.body.uid),
           kv
         )
           .then(() => {
@@ -749,51 +749,56 @@ attach
              *
              *
              */
+            var keyvalue = {},
+              accts = accs.map((store) => {
+                var kv = {};
+                const digits = String(store.name).substring(0, 2),
+                  link = `stripe${digits}Link`,
+                  id = `stripe${digits}Id`;
+                //customer = `customer${digits}Id`,
+                //cardholder = `cardholder${digits}Id`;
+                kv[link] = store.accountLink;
+                kv[id] = store.id;
+                //kv[customer] = store.customerId;
+                //kv[cardholder] = store.cardholderId;
+                //kv.invoice_prefix = store.invoice_prefix;
+                return kv;
+              });
+            accts.forEach((store) => {
+              Object.keys(store).forEach((key) => {
+                keyvalue[key] = store[key];
+              });
+            });
             getDoc(doc(collection(firestore, "userDatas"), req.body.uid))
-              .then((d) => {
-                var keyvalue = {},
-                  accts = accs.map((store) => {
-                    var kv = {};
-                    const digits = String(store.name).substring(0, 2),
-                      link = `stripe${digits}Link`,
-                      id = `stripe${digits}Id`;
-                    //customer = `customer${digits}Id`,
-                    //cardholder = `cardholder${digits}Id`;
-                    kv[link] = store.accountLink;
-                    kv[id] = store.id;
-                    //kv[customer] = store.customerId;
-                    //kv[cardholder] = store.cardholderId;
-                    //kv.invoice_prefix = store.invoice_prefix;
-                    return kv;
-                  });
-                accts.forEach((store) => {
-                  Object.keys(store).forEach((key) => {
-                    keyvalue[key] = store[key];
-                  });
-                });
+              /*.then((d) => {
                 return { keyvalue, exists: d.exists() };
-              })
-              .then(({ keyvalue, exists }) => {
-                (exists ? updateDoc : setDoc)(
-                  doc(firestore, "userDatas", req.body.uid),
-                  keyvalue
-                )
-                  .then(() => {
-                    RESSEND(res, {
-                      statusCode,
-                      statusText: "successful accountLink",
-                      accounts
-                    });
-                  })
-                  .catch((e) =>
-                    standardCatch(
-                      res,
-                      e,
-                      { keyvalue },
-                      "firestore store id (then callback)"
-                    )
-                  ); //plaidLink payouts account.details_submitted;
-              })
+              })*/
+              .then(
+                (
+                  //{ keyvalue, exists }
+                  d
+                ) => {
+                  (d.exists() ? updateDoc : setDoc)(
+                    doc(collection(firestore, "userDatas"), req.body.uid),
+                    keyvalue
+                  )
+                    .then(() => {
+                      RESSEND(res, {
+                        statusCode,
+                        statusText: "successful accountLink",
+                        accounts
+                      });
+                    })
+                    .catch((e) =>
+                      standardCatch(
+                        res,
+                        e,
+                        { keyvalue },
+                        "firestore store id (then callback)"
+                      )
+                    ); //plaidLink payouts account.details_submitted;
+                }
+              )
               .catch((e) =>
                 standardCatch(
                   res,
