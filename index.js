@@ -23,18 +23,30 @@ require("dotenv").config();
     //increment
   } = require("firebase/firestore/lite"), // /lite
   firestore = getFirestore(firebase),*/
-const { initializeApp: initApp, cert } = require("firebase-admin/app"),
-  {
-    getFirestore,
-    getDoc,
-    doc,
-    updateDoc,
-    setDoc,
-    collection
-    //increment
-  } = require("firebase-admin/firestore"),
-  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
-  { getAuth, deleteUser } = require("firebase-admin/auth");
+var FIREBASEADMIN = null;
+try {
+  const finishedParsing = JSON.parse(process.env.FIREBASE_KEY),
+    { initializeApp: initApp, cert } = require("firebase-admin/app");
+  FIREBASEADMIN = initApp({
+    credential: cert(finishedParsing),
+    databaseURL: "https://vaumoney.firebaseio.com"
+  });
+} catch {}
+/*var FIREBASEADMIN = (() => {
+    return initApp({
+      credential,
+      databaseURL: "https://vaumoney.firebaseio.com"
+    });
+  })();*/
+const {
+  getFirestore,
+  getDoc,
+  doc,
+  updateDoc,
+  setDoc,
+  collection
+  //increment
+} = require("firebase-admin/firestore");
 /*FIREBASEADMIN = initializeApp(
     {
       credential,
@@ -57,11 +69,8 @@ const { initializeApp: initApp, cert } = require("firebase-admin/app"),
   defaultAuth = getAuth(this.firebaseAoo);
   defaultAuth = deleteUser(this.firebaseAoo);
 }*/
-const FIREBASEADMIN = initApp({
-  credential,
-  databaseURL: "https://vaumoney.firebaseio.com"
-});
 const firestore = getFirestore(FIREBASEADMIN),
+  { getAuth, deleteUser } = require("firebase-admin/auth"),
   port = 8080,
   allowedOrigins = [
     "https://sausage.saltbank.org",
@@ -762,57 +771,12 @@ attach
              *
              *
              */
-            var keyvalue = {};
-            accs.forEach((store) => {
-              const digits = String(store.name).substring(0, 2);
-              //customer = `customer${digits}Id`,
-              //cardholder = `cardholder${digits}Id`;
-              keyvalue[`stripe${digits}Link`] = store.accountLink;
-              keyvalue[`stripe${digits}Id`] = store.id;
-              //kv[customer] = store.customerId;
-              //kv[cardholder] = store.cardholderId;
-              //kv.invoice_prefix = store.invoice_prefix;
-              //return kv;
+
+            RESSEND(res, {
+              statusCode,
+              statusText: "successful accountLink",
+              accounts: accs
             });
-            RESSEND(res, { statusCode, statusText, error: "before getDoc" });
-            getDoc(doc(collection(firestore, "userDatas"), req.body.uid))
-              /*.then((d) => {
-                return { keyvalue, exists: d.exists() };
-              })*/
-              .then(
-                (
-                  //{ keyvalue, exists }
-                  d
-                ) => {
-                  (d.exists() ? updateDoc : setDoc)(
-                    doc(collection(firestore, "userDatas"), req.body.uid),
-                    keyvalue
-                  )
-                    .then(() => {
-                      RESSEND(res, {
-                        statusCode,
-                        statusText: "successful accountLink",
-                        accounts
-                      });
-                    })
-                    .catch((e) =>
-                      standardCatch(
-                        res,
-                        e,
-                        { keyvalue },
-                        "firestore store id (then callback)"
-                      )
-                    ); //plaidLink payouts account.details_submitted;
-                }
-              )
-              .catch((e) =>
-                standardCatch(
-                  res,
-                  e,
-                  { accs },
-                  "firestore store id (get callback)"
-                )
-              );
           })
           .catch((e) =>
             standardCatch(res, e, { accounts }, "accountLinks (then callback)")
