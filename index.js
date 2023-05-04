@@ -17,12 +17,14 @@ const firebaseConfig = {
     getDoc,
     doc,
     updateDoc,
-    setDoc,
-    increment
+    setDoc
+    //increment
   } = require("firebase/firestore/lite"), // /lite
   firestore = getFirestore(firebase),
-  { initializeApp: initApp, cert } = require("firebase-admin/app"),
-  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
+  {
+    initializeApp: initApp //cert
+  } = require("firebase-admin/app"),
+  //credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
   { getAuth, deleteUser } = require("firebase-admin/auth");
 /*FIREBASEAUTH = initializeApp(
     {
@@ -704,7 +706,8 @@ attach
                       await stripe.accountLinks.create({
                         account: store.id, //: 'acct_1032D82eZvKYlo2C',
                         return_url: i === 0 ? origin : lastLink, // + "/prompt=" + req.body.uid,
-                        refresh_url: origin, //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
+                        refresh_url: origin, //just delete the ones unlinked. redo
+                        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
                         //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
                         //collect: "eventually_due"
                         type: "account_onboarding"
@@ -735,6 +738,7 @@ attach
             //const subscriptionId = subscription();
             if (!accs.every((x) => x.constructor === Object && !x.error))
               return RESSEND(res, failOpening(req, error));
+            RESSEND(res, { statusCode, statusText, error: "before getDoc" });
             /**
              * Begin process update userDatas with key-value object
              *
