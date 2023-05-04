@@ -1,6 +1,7 @@
 require("dotenv").config();
 
-const firebaseConfig = {
+//https://stackoverflow.com/questions/71071559/get-document-data-from-firebase-firestore-in-node-js
+/*const firebaseConfig = {
     apiKey: "AIzaSyCEiWNGlidcYoXLizAstyhxBpyhfBFu3JY",
     authDomain: "vaumoney.firebaseapp.com",
     databaseURL: "https://vaumoney.firebaseio.com",
@@ -21,35 +22,42 @@ const firebaseConfig = {
     collection
     //increment
   } = require("firebase/firestore/lite"), // /lite
-  firestore = getFirestore(firebase),
+  firestore = getFirestore(firebase),*/
+const { initializeApp: initApp, cert } = require("firebase-admin/app"),
   {
-    initializeApp: initApp //cert
-  } = require("firebase-admin/app"),
-  //credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
+    getFirestore,
+    getDoc,
+    doc,
+    updateDoc,
+    setDoc,
+    collection
+    //increment
+  } = require("firebase-admin/firestore"),
+  credential = cert(JSON.parse(process.env.FIREBASE_KEY)),
   { getAuth, deleteUser } = require("firebase-admin/auth");
-/*FIREBASEAUTH = initializeApp(
+/*FIREBASEADMIN = initializeApp(
     {
       credential,
       databaseURL: "https://vaumoney.firebaseio.com"
     },
-    "FIREBASEAUTH"
+    "FIREBASEADMIN"
   ),*/
 
-class FIREBASEAUTH {
+class FIREBASEADMIN {
   constructor() {
-    this.firebaseAoo = initApp /*
-      {
-        credential,
-        databaseURL: "https://vaumoney.firebaseio.com"
-      }*/();
+    this.firebaseAoo = initApp({
+      credential,
+      databaseURL: "https://vaumoney.firebaseio.com"
+    });
     //"The default Firebase app does not exist."
     //https://stackoverflow.com/a/62890190/11711280
-    //"FIREBASEAUTH"
+    //"FIREBASEADMIN"
   }
   defaultAuth = getAuth(this.firebaseAoo);
   defaultAuth = deleteUser(this.firebaseAoo);
 }
-const port = 8080,
+const firestore = getFirestore(FIREBASEADMIN),
+  port = 8080,
   allowedOrigins = [
     "https://sausage.saltbank.org",
     "https://i7l8qe.csb.app",
@@ -119,7 +127,7 @@ const port = 8080,
   database = express.Router(),
   cors = require("cors"),
   stripe = require("stripe")(process.env.STRIPE_SECRET);
-//FIREBASEAUTH = FIREBASEAUTH.toSource(); //https://dashboard.stripe.com/account/apikeys
+//FIREBASEADMIN = FIREBASEADMIN.toSource(); //https://dashboard.stripe.com/account/apikeys
 
 //catches ctrl+c event
 process.on("SIGINT", exitHandler.bind(null, { exit: true }));
@@ -931,7 +939,7 @@ database.post("/deleteemail", async (req, res) => {
       delete auth.email;
       delete auth.emailVerified;
       delete auth.password;
-      await getAuth(FIREBASEAUTH)
+      await getAuth(FIREBASEADMIN)
         .createUser(auth)
         .then((w) =>
           RESSEND(res, {
