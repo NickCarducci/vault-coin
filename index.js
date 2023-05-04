@@ -144,7 +144,7 @@ const firestore = getFirestore(FIREBASEADMIN),
   stripe = require("stripe")(process.env.STRIPE_SECRET);
 //FIREBASEADMIN = FIREBASEADMIN.toSource(); //https://dashboard.stripe.com/account/apikeys
 
-app.use(timeout("60s"));
+app.use(timeout("5s"));
 //catches ctrl+c event
 process.on("SIGINT", exitHandler.bind(null, { exit: true }));
 // catches "kill pid" (for example: nodemon restart)
