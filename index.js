@@ -749,26 +749,19 @@ attach
              *
              *
              */
-            var keyvalue = {},
-              accts = accs.map((store) => {
-                var kv = {};
-                const digits = String(store.name).substring(0, 2),
-                  link = `stripe${digits}Link`,
-                  id = `stripe${digits}Id`;
-                //customer = `customer${digits}Id`,
-                //cardholder = `cardholder${digits}Id`;
-                kv[link] = store.accountLink;
-                kv[id] = store.id;
-                //kv[customer] = store.customerId;
-                //kv[cardholder] = store.cardholderId;
-                //kv.invoice_prefix = store.invoice_prefix;
-                return kv;
-              });
-            accts.forEach((store) => {
-              Object.keys(store).forEach((key) => {
-                keyvalue[key] = store[key];
-              });
+            var keyvalue = {};
+            accs.forEach((store) => {
+              const digits = String(store.name).substring(0, 2);
+              //customer = `customer${digits}Id`,
+              //cardholder = `cardholder${digits}Id`;
+              keyvalue[`stripe${digits}Link`] = store.accountLink;
+              keyvalue[`stripe${digits}Id`] = store.id;
+              //kv[customer] = store.customerId;
+              //kv[cardholder] = store.cardholderId;
+              //kv.invoice_prefix = store.invoice_prefix;
+              //return kv;
             });
+            RESSEND(res, { statusCode, statusText, error: "before getDoc" });
             getDoc(doc(collection(firestore, "userDatas"), req.body.uid))
               /*.then((d) => {
                 return { keyvalue, exists: d.exists() };
