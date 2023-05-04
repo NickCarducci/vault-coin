@@ -452,33 +452,6 @@ attach
       return RESSEND(res, failOpening(req, "cardholder"));
     }
 
-    getDoc(doc(collection(firestore, "userDatas"), req.body.uid))
-      .then((d) => {
-        var kv = {};
-        const digits = String(req.body.mcc).substring(0, 2),
-          customer = `customer${digits}Id`,
-          cardholder = `cardholder${digits}Id`;
-        kv[customer] = req.body.customerId;
-        kv[cardholder] = req.body.cardholderId;
-        //kv.invoice_prefix = store.invoice_prefix;
-        (d.exists() ? updateDoc : setDoc)(
-          doc(collection(firestore, "userDatas"), req.body.uid),
-          kv
-        )
-          .then(() => {
-            RESSEND(res, {
-              statusCode,
-              statusText: "successful accountLink",
-              kv
-            });
-          })
-          .catch((e) =>
-            standardCatch(res, e, {}, "firestore customer id (update callback)")
-          ); //plaidLink payouts account.details_submitted;
-      })
-      .catch((e) =>
-        standardCatch(res, e, {}, "firestore customer id (then callback)")
-      ); //plaidLink payouts account.details_submitted;
     RESSEND(res, { statusCode, statusText, customer: cus, cardholder: ich });
   })
   /*.post("/assess", async (req, res) => {

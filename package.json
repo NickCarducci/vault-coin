@@ -15,7 +15,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
-    "firebase": "^9.21.0",
     "firebase-admin": "^11.7.0",
     "node-fetch": "^2.6.7",
     "plaid": "^12.1.0",
