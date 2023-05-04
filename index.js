@@ -17,7 +17,8 @@ const firebaseConfig = {
     getDoc,
     doc,
     updateDoc,
-    setDoc
+    setDoc,
+    collection
     //increment
   } = require("firebase/firestore/lite"), // /lite
   firestore = getFirestore(firebase),
@@ -427,7 +428,7 @@ attach
       return RESSEND(res, failOpening(req, "cardholder"));
     }
 
-    getDoc(doc(firestore, "userDatas", req.body.uid)).then((d) => {
+    getDoc(doc(collection(firestore, "userDatas"), req.body.uid)).then((d) => {
       var kv = {};
       const digits = String(req.body.mcc).substring(0, 2),
         customer = `customer${digits}Id`,
@@ -738,13 +739,13 @@ attach
             //const subscriptionId = subscription();
             if (!accs.every((x) => x.constructor === Object && !x.error))
               return RESSEND(res, failOpening(req, error));
-            RESSEND(res, { statusCode, statusText, error: "before getDoc" });
+            //RESSEND(res, { statusCode, statusText, error: "before getDoc" });
             /**
              * Begin process update userDatas with key-value object
              *
              *
              */
-            getDoc(doc(firestore, "userDatas", req.body.uid))
+            getDoc(doc(collection(firestore, "userDatas"), req.body.uid))
               .then((d) => {
                 var keyvalue = {},
                   accts = accs.map((store) => {
