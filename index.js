@@ -129,6 +129,7 @@ const firestore = getFirestore(FIREBASEADMIN),
     //if (!res.secure) return true;
     //https://stackoverflow.com/questions/12027187/difference-between-allow-and-access-control-allow-methods-in-http-response-h
   },
+  timeout = require("connect-timeout"),
   fetch = require("node-fetch"),
   express = require("express"),
   app = express(),
@@ -143,6 +144,7 @@ const firestore = getFirestore(FIREBASEADMIN),
   stripe = require("stripe")(process.env.STRIPE_SECRET);
 //FIREBASEADMIN = FIREBASEADMIN.toSource(); //https://dashboard.stripe.com/account/apikeys
 
+app.use(timeout("60s"));
 //catches ctrl+c event
 process.on("SIGINT", exitHandler.bind(null, { exit: true }));
 // catches "kill pid" (for example: nodemon restart)

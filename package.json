@@ -18,7 +18,8 @@
     "firebase-admin": "^11.7.0",
     "node-fetch": "^2.6.7",
     "plaid": "^12.1.0",
-    "stripe": "^11.8.0"
+    "stripe": "^11.8.0",
+    "timeout": "^0.2.1"
   },
   "false": {
     "babel-register": "^6.26.0"
