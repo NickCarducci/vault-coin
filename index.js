@@ -43,20 +43,24 @@ const { initializeApp: initApp, cert } = require("firebase-admin/app"),
     "FIREBASEADMIN"
   ),*/
 
-class FIREBASEADMIN {
+/*class FIREBASEADMIN {
   constructor() {
     this.firebaseAoo = initApp();
     /*this.firebaseAoo = initApp({
       credential,
       databaseURL: "https://vaumoney.firebaseio.com"
-    });*/
+    });* /
     //"The default Firebase app does not exist."
     //https://stackoverflow.com/a/62890190/11711280
     //"FIREBASEADMIN"
   }
   defaultAuth = getAuth(this.firebaseAoo);
   defaultAuth = deleteUser(this.firebaseAoo);
-}
+}*/
+const FIREBASEADMIN = initApp({
+  credential,
+  databaseURL: "https://vaumoney.firebaseio.com"
+});
 const firestore = getFirestore(FIREBASEADMIN),
   port = 8080,
   allowedOrigins = [
