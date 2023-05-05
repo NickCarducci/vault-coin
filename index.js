@@ -523,6 +523,9 @@ attach
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
     }
+    if (!req.body.newAccount)
+      return RESSEND(res, { statusCode, statusText, error: "no newAccount" });
+    RESSEND(res, { statusCode, statusText, data: "ok before link" });
 
     if (error) return RESSEND(res, { statusCode, statusText, error });
     const person_ = await /*promiseCatcher(
@@ -559,7 +562,6 @@ attach
     });
 
     if (error) return RESSEND(res, { statusCode, statusText, error });
-    RESSEND(res, { statusCode, statusText, data: "ok before link" });
     const accLink =
       /*promiseCatcher(
                         r,
