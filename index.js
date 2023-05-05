@@ -83,7 +83,7 @@ const firestore = getFirestore(FIREBASEADMIN),
     //res.end();
   },
   allowOriginType = (origin, res, preflight) => {
-    if (!preflight) return null;
+    if (!preflight || res.secure) return null;
     res.setHeader("Access-Control-Allow-Origin", origin);
     //allowedOrigins[allowedOrigins.indexOf(origin)]
     res.setHeader("Content-Type", "Application/JSON");
