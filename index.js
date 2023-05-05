@@ -539,11 +539,15 @@ attach
     const person_ = await /*promiseCatcher(
                   r,
                   "person",*/
-    stripe.accounts.createPerson(acct.id, {
-      first_name: req.body.first,
-      last_name: req.body.last,
-      person_token: req.body.person.account_token
-    });
+    stripe.accounts
+      .createPerson(acct.id, {
+        first_name: req.body.first,
+        last_name: req.body.last,
+        person_token: req.body.person.account_token
+      })
+      .catch((e) =>
+        standardCatch(res, e, { acct }, "person (create callback)")
+      );
 
     if (!person_.id) {
       error = "person";
@@ -552,9 +556,13 @@ attach
     const acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
-    stripe.accounts.update(acct.id, {
-      account_token: req.body.companyAccount.account_token
-    });
+    stripe.accounts
+      .update(acct.id, {
+        account_token: req.body.companyAccount.account_token
+      })
+      .catch((e) =>
+        standardCatch(res, e, { acct }, "account (update callback)")
+      );
 
     if (!acct_.id) {
       error = "update";
