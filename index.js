@@ -698,23 +698,22 @@ attach
         progress: "yet to surname factor digit counts.."
       });
     var deleteThese = req.body.deleteThese;
-    if (deleteThese) {
-      deleteThese.constructor === Array &&
-        Promise.all(
-          deleteThese.map(
-            async (x) =>
-              await new Promise((r) =>
-                stripe.accounts.del(x).then(async () => {
-                  r("{}");
-                })
-              )
-          )
+    if (deleteThese && deleteThese.constructor === Array) {
+      Promise.all(
+        deleteThese.map(
+          async (x) =>
+            await new Promise((r) =>
+              stripe.accounts.del(x).then(async () => {
+                r("{}");
+              })
+            )
         )
-          //.then(()=>{})//prefixMap
-          .catch((err) => {
-            console.log("delete error: ", err.message);
-            return err;
-          });
+      )
+        //.then(()=>{})//prefixMap
+        .catch((err) => {
+          console.log("delete error: ", err.message);
+          return err;
+        });
 
       return RESSEND(res, {
         statusCode,
