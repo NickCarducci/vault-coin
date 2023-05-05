@@ -514,7 +514,12 @@ attach
     //dangerous; assumes one: storeId-kv (without newAccount field)
     //RESSEND(res,);
     if (!req.body.newAccount)
-      return RESSEND(res, { statusCode, statusText, error: "no newAccount" });
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no newAccount",
+        body: req.body
+      });
     RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
       acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
