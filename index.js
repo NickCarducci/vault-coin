@@ -536,7 +536,6 @@ attach
       return RESSEND(res, { statusCode, statusText, error });
     }
 
-    if (error) return RESSEND(res, { statusCode, statusText, error });
     const person_ = await /*promiseCatcher(
                   r,
                   "person",*/
