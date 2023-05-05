@@ -520,13 +520,17 @@ attach
         error: "no newAccount",
         body: req.body
       });
-    RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
-      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
-        type: req.body.type,
-        country: req.body.country,
-        ...req.body.newAccount
-      });
+      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
+        .create({
+          type: req.body.type,
+          country: req.body.country,
+          ...req.body.newAccount
+        })
+        .catch((e) =>
+          standardCatch(res, e, { body: req.body }, "account (create callback)")
+        );
+    RESSEND(res, { statusCode, statusText, data: "ok before person" });
     if (!acct.id) {
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
