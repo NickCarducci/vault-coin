@@ -513,6 +513,9 @@ attach
     //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
     //dangerous; assumes one: storeId-kv (without newAccount field)
     //RESSEND(res,);
+    if (!req.body.newAccount)
+      return RESSEND(res, { statusCode, statusText, error: "no newAccount" });
+    RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
       acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
         type: req.body.type,
@@ -523,9 +526,6 @@ attach
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
     }
-    if (!req.body.newAccount)
-      return RESSEND(res, { statusCode, statusText, error: "no newAccount" });
-    RESSEND(res, { statusCode, statusText, data: "ok before link" });
 
     if (error) return RESSEND(res, { statusCode, statusText, error });
     const person_ = await /*promiseCatcher(
