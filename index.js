@@ -577,7 +577,10 @@ attach
       //accountLink
     };
 
-    if (error) return RESSEND(res, { statusCode, statusText, error });
+    if (!store.id) {
+      error = "link";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
     const accLink =
       /*promiseCatcher(
                         r,
@@ -595,7 +598,7 @@ attach
         .catch((e) =>
           standardCatch(res, e, { acct }, "account (update callback)")
         );
-    if (!accLink) {
+    if (!accLink.url) {
       error = "accountLink";
       return RESSEND(res, { statusCode, statusText, error });
     }
