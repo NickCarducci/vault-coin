@@ -399,7 +399,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     };
   };
 const requirebody = (req, res) =>
-    !req.body && RESSEND(res, failOpening(req, "account")),
+    !req.body ? RESSEND(res, failOpening(req, "account")) : {},
   originbody = (req, res, body) => {
     var origin = req.query.origin;
     if (!origin) {
