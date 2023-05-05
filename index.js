@@ -605,12 +605,11 @@ attach
     lastLink = accLink.url;
     //name, id, customerId, cardholderId
     store.accountLink = accLink;
-    const account = store && JSON.stringify(store);
 
     RESSEND(res, {
       statusCode,
       statusText: "successful accountLink",
-      account
+      account: store
     });
   })
   .post("/delete", async (req, res) => {
