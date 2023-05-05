@@ -577,7 +577,7 @@ attach
       //cardholderId: ich.id
       //accountLink
     };
-
+    RESSEND(res, { statusCode, statusText, data: "ok before link" });
     if (!store.id) {
       error = "link";
       return RESSEND(res, { statusCode, statusText, error });
