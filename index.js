@@ -698,7 +698,11 @@ attach
         progress: "yet to surname factor digit counts.."
       });
     var deleteThese = req.body.deleteThese;
-    if (deleteThese && deleteThese.constructor === Array) {
+    if (
+      deleteThese &&
+      deleteThese.constructor === Array &&
+      deleteThese.length > 0
+    ) {
       Promise.all(
         deleteThese.map(
           async (x) =>
