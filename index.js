@@ -530,7 +530,7 @@ attach
         .catch((e) =>
           standardCatch(res, e, { body: req.body }, "account (create callback)")
         );
-    RESSEND(res, { statusCode, statusText, data: "ok before person" });
+    //RESSEND(res, { statusCode, statusText, data: "ok before person" });
     if (!acct.id) {
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
