@@ -82,6 +82,22 @@ const firestore = getFirestore(FIREBASEADMIN),
     res.send(e);
     //res.end();
   },
+  allowOriginType = (origin, res, preflight) => {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    if (!preflight) return null;
+    //allowedOrigins[allowedOrigins.indexOf(origin)]
+    res.setHeader("Content-Type", "Application/JSON");
+    res.setHeader("Allow", ["POST", "OPTIONS", "GET"]);
+    res.setHeader("Access-Control-Allow-Headers", [
+      "Content-Type",
+      "Access-Control-Request-Method",
+      "Access-Control-Request-Methods",
+      "Access-Control-Request-Headers"
+    ]);
+    res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
+    //if (!res.secure) return true;
+    //https://stackoverflow.com/questions/12027187/difference-between-allow-and-access-control-allow-methods-in-http-response-h
+  },
   preflight = (req, res) => {
     const origin = req.headers.origin;
     app.use(cors({ origin })); //https://stackoverflow.com/questions/36554375/getting-the-req-origin-in-express
@@ -94,7 +110,7 @@ const firestore = getFirestore(FIREBASEADMIN),
         statusCode: 401,
         error: "no access for this origin- " + req.headers.origin
       });
-    if (allowOriginType(req.headers.origin, res))
+    if (allowOriginType(req.headers.origin, res, true))
       return RESSEND(res, {
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
@@ -113,21 +129,6 @@ const firestore = getFirestore(FIREBASEADMIN),
       error: e,
       extra
     });
-  },
-  allowOriginType = (origin, res) => {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    //allowedOrigins[allowedOrigins.indexOf(origin)]
-    res.setHeader("Content-Type", "Application/JSON");
-    res.setHeader("Allow", ["POST", "OPTIONS", "GET"]);
-    res.setHeader("Access-Control-Allow-Headers", [
-      "Content-Type",
-      "Access-Control-Request-Method",
-      "Access-Control-Request-Methods",
-      "Access-Control-Request-Headers"
-    ]);
-    res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
-    //if (!res.secure) return true;
-    //https://stackoverflow.com/questions/12027187/difference-between-allow-and-access-control-allow-methods-in-http-response-h
   },
   timeout = require("connect-timeout"),
   fetch = require("node-fetch"),
