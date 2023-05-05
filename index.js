@@ -478,8 +478,11 @@ attach
       });
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
-    deleteThese &&
+    if (
+      deleteThese &&
       deleteThese.constructor === Array &&
+      deleteThese.length > 0
+    ) {
       Promise.all(
         deleteThese.map(
           async (x) =>
@@ -493,6 +496,12 @@ attach
         console.log("delete error: ", err.message);
         return err;
       });
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok deleted"
+      });
+    }
     var error = null;
     /**
      * Begin process accounts and customer creation
@@ -876,7 +885,7 @@ attach
                     const account = store && JSON.stringify(store);
                     return account && r(account);
                   },
-                  error ? 0 : 5000 * i
+                  error ? 0 : 0 // 5000 * i
                 );
               })
           )
