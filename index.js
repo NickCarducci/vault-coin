@@ -520,7 +520,7 @@ attach
         error: "no newAccount",
         body: req.body
       });
-    //RESSEND(res, { statusCode, statusText, data: "ok before account" });
+    RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
       acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
         type: req.body.type,
