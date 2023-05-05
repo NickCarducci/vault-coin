@@ -559,6 +559,7 @@ attach
     });
 
     if (error) return RESSEND(res, { statusCode, statusText, error });
+    RESSEND(res, { statusCode, statusText, data: "ok before link" });
     const accLink =
       /*promiseCatcher(
                         r,
