@@ -466,7 +466,119 @@ attach
     });
     end({ bankId: bank.id });
   })*/
-  .post("/join", async (req, res) => {
+  .post("/purchase", async (req, res) => {
+    //Can you call to resolve an asynchronous function from Express middleware that's
+    //declared in the Node.js process' scope?
+    var origin = originbody(req, res, true);
+    if (allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+    var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
+
+    deleteThese &&
+      deleteThese.constructor === Array &&
+      Promise.all(
+        deleteThese.map(
+          async (x) =>
+            await new Promise((r) =>
+              stripe.accounts.del(x).then(async () => {
+                r("{}");
+              })
+            )
+        )
+      ).catch((err) => {
+        console.log("delete error: ", err.message);
+        return err;
+      });
+    var error = null;
+    /**
+     * Begin process accounts and customer creation
+     *
+     *
+     */
+    //account_token: body.newAccount.account_token
+    //https://stripe.com/docs/connect/account-tokens
+    //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
+    //dangerous; assumes one: storeId-kv (without newAccount field)
+    //RESSEND(res,);
+    const name = req.body.newAccount.business_profile.mcc,
+      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
+        type: req.body.type,
+        country: req.body.country,
+        ...req.body.newAccount
+      });
+    if (!acct.id) {
+      error = "account";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+
+    if (error) return RESSEND(res, { statusCode, statusText, error });
+    const person_ = await /*promiseCatcher(
+                  r,
+                  "person",*/
+    stripe.accounts.createPerson(acct.id, {
+      first_name: req.body.first,
+      last_name: req.body.last,
+      person_token: req.body.person.account_token
+    });
+
+    if (!person_.id) {
+      error = "person";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+    const acct_ = await /*promiseCatcher(
+                  r,
+                  "update",*/
+    stripe.accounts.update(acct.id, {
+      account_token: req.body.companyAccount.account_token
+    });
+
+    if (!acct_.id) {
+      error = "update";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+    const store = JSON.stringify({
+      //invoice_prefix: customer.invoice_prefix,
+      name,
+      id: acct_.id
+      //customerId: cus.id
+      //cardholderId: ich.id
+      //accountLink
+    });
+
+    if (error) return RESSEND(res, { statusCode, statusText, error });
+    const accLink =
+      /*promiseCatcher(
+                        r,
+                        "accountLink",*/
+      await stripe.accountLinks.create({
+        account: store.id, //: 'acct_1032D82eZvKYlo2C',
+        return_url: origin, // + "/prompt=" + req.body.uid,
+        refresh_url: origin, //just delete the ones unlinked. redo
+        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
+        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
+        //collect: "eventually_due"
+        type: "account_onboarding"
+      });
+    if (!accLink) {
+      error = "accountLink";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+    lastLink = accLink.url;
+    //name, id, customerId, cardholderId
+    store.accountLink = accLink;
+    const account = store && JSON.stringify(store);
+
+    RESSEND(res, {
+      statusCode,
+      statusText: "successful accountLink",
+      account
+    });
+  })
+  .post("/delete", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
     var origin = originbody(req, res, true);
@@ -477,10 +589,10 @@ attach
         progress: "yet to surname factor digit counts.."
       });
     /*return res.send({
-      statusCode,
-      statusText,
-      why: "no work"
-    });*/
+    statusCode,
+    statusText,
+    why: "no work"
+  });*/
     /**
      * Decrement merchantSurnamePrefix count
      *
@@ -488,62 +600,62 @@ attach
      */
     const prefixMap = async (
       merchantSurnamePrefix /* = async (res) => {
-        const json = JSON.parse(res);
-        return json;
-      }*/
+      const json = JSON.parse(res);
+      return json;
+    }*/
     ) => {
       //const totalMerchantSurnames =
       /*await getDoc(doc(firestore, "merchantSurnames", merchantSurnamePrefix))
-        .then((d) => {
-          (d.exists() ? updateDoc : setDoc)(
-            doc(firestore, "merchantSurnames", merchantSurnamePrefix),
-            { count: increment(1) }
-          );
-          return { ...d.data(), id: d.id }.count + 1;
-        })
-        .catch((err) => {
-          console.log(
-            "deleted; surname update,set, or get failure: ",
-            err.message
-          );
-          return err;
-        });
-      return null;*/
+      .then((d) => {
+        (d.exists() ? updateDoc : setDoc)(
+          doc(firestore, "merchantSurnames", merchantSurnamePrefix),
+          { count: increment(1) }
+        );
+        return { ...d.data(), id: d.id }.count + 1;
+      })
+      .catch((err) => {
+        console.log(
+          "deleted; surname update,set, or get failure: ",
+          err.message
+        );
+        return err;
+      });
+    return null;*/
     }; //Just do on front end
     req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
       prefixMap(merchantSurnamePrefix);
     });
     /*RESSEND(res, {
-      statusCode,
-      statusText,
-      progress: "beyond surname factor digit counts"
-    });*/
+    statusCode,
+    statusText,
+    progress: "beyond surname factor digit counts"
+  });*/
     /**
      * Delete accounts
      *
      *
      */
     /*const deletethisone = async (x) => {
-      await new Promise((r) =>
-        stripe.accounts.del(x).then(async () => {
-          r("{}");
-        })
-      );
-    };*/
+    await new Promise((r) =>
+      stripe.accounts.del(x).then(async () => {
+        r("{}");
+      })
+    );
+  };*/
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
     /*const developing = true;
-    var accounts = null;
-    if (developing)
-      accounts = await stripe.accounts.list({
-        limit: 4
-      });
-    if (accounts.url !== "/v1/accounts") {
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        accounts
-      });
-    }*/
+  var accounts = null;
+  if (developing)
+    accounts = await stripe.accounts.list({
+      limit: 4
+    });
+  if (accounts.url !== "/v1/accounts") {
+    return RESSEND(res, {
+      statusCode,
+      statusText,
+      accounts
+    });
+  }*/
     //deleteThese = accounts.data;
     deleteThese &&
       deleteThese.constructor === Array &&
@@ -556,12 +668,12 @@ attach
               })
             )
           /*async (x) => {
-            try {
-              return deletethisone(x);
-            } catch (e) {
-              RESSEND(res, failOpening(req, "accounts"));
-            }
-          }*/
+          try {
+            return deletethisone(x);
+          } catch (e) {
+            RESSEND(res, failOpening(req, "accounts"));
+          }
+        }*/
         )
       )
         //.then(()=>{})//prefixMap
@@ -569,11 +681,48 @@ attach
           console.log("delete error: ", err.message);
           return err;
         });
-    /*RESSEND(res, {
+    RESSEND(res, {
       statusCode,
       statusText,
-      progress: "beyond sinking customers / deletion accounts"
-    });*/
+      data: "ok deleted"
+    });
+  })
+  .post("/join", async (req, res) => {
+    //Can you call to resolve an asynchronous function from Express middleware that's
+    //declared in the Node.js process' scope?
+    var origin = originbody(req, res, true);
+    if (allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+    var deleteThese = req.body.deleteThese;
+    if (deleteThese) {
+      deleteThese.constructor === Array &&
+        Promise.all(
+          deleteThese.map(
+            async (x) =>
+              await new Promise((r) =>
+                stripe.accounts.del(x).then(async () => {
+                  r("{}");
+                })
+              )
+          )
+        )
+          //.then(()=>{})//prefixMap
+          .catch((err) => {
+            console.log("delete error: ", err.message);
+            return err;
+          });
+
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok deleted"
+      });
+    }
+    /**/
     /* Don't delete customers
     
     const sinkThese = req.body.sinkThese; // []; //sandbox only! ("cus_")
