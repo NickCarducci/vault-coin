@@ -554,6 +554,7 @@ attach
       error = "person";
       return RESSEND(res, { statusCode, statusText, error });
     }
+    RESSEND(res, { statusCode, statusText, data: "ok after person" });
     const acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
@@ -577,7 +578,6 @@ attach
       //cardholderId: ich.id
       //accountLink
     };
-    RESSEND(res, { statusCode, statusText, data: "ok before link" });
     if (!store.id) {
       error = "link";
       return RESSEND(res, { statusCode, statusText, error });
