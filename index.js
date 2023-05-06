@@ -563,14 +563,10 @@ attach
       const error = "accountLink";
       return RESSEND(res, { statusCode, statusText, error });
     }
-    lastLink = accLink.url;
-    //name, id, customerId, cardholderId
-    acct_.accountLink = accLink;
-
     RESSEND(res, {
       statusCode,
       statusText: "successful accountLink",
-      account: acct_
+      account: { id: acct_.id, accountLink: accLink }
     });
   })
   .post("/delete", async (req, res) => {
