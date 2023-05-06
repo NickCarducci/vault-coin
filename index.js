@@ -509,152 +509,69 @@ attach
       account: { accountLink: accLink, id: req.body.accountId }
     });
   })
-  .post("/purchase", async (req, res) => {
-    //"Cannot setHeader headers after they are sent to the client"
-    var origin = refererOrigin(req, res);
-    //RESSEND(res, { statusCode, statusText, data: "ok without headers" });
-    if (!req.body || allowOriginType(origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        progress: "yet to surname factor digit counts.."
-      });
-
-    //Cannot set headers after they are sent to the client
-    var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
-
-    if (
-      deleteThese &&
-      deleteThese.constructor === Array &&
-      deleteThese.length > 0
-    ) {
-      Promise.all(
-        deleteThese.map(
-          async (x) =>
-            await new Promise((r) =>
-              stripe.accounts.del(x).then(async () => {
-                r("{}");
-              })
-            )
-        )
-      ).catch((err) => {
-        console.log("delete error: ", err.message);
-        return err;
-      });
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        data: "ok deleted"
-      });
-    }
-    var error = null;
-    /**
-     * Begin process accounts and customer creation
-     *
-     *
-     */
-    //account_token: body.newAccount.account_token
-    //https://stripe.com/docs/connect/account-tokens
-    //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
-    //dangerous; assumes one: storeId-kv (without newAccount field)
-    //RESSEND(res,);
-    if (!req.body.newAccount)
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        error: "no newAccount",
-        body: req.body
-      });
-    const name = req.body.newAccount.business_profile.mcc,
-      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
-        type: req.body.type,
-        country: req.body.country,
-        ...req.body.newAccount
-      });
-    //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
-    /*RESSEND(res, {
-      statusCode,
-      statusText,
-      data: "account added before person"
-    });*/
-    if (!acct.id) {
-      error = "account";
-      return RESSEND(res, { statusCode, statusText, error });
-    }
-
+  .post("/beneficiary", async (req, res) => {
     const person_ = await /*promiseCatcher(r,
                   "person",*/
-    stripe.accounts.createPerson(acct.id, {
+    stripe.accounts.createPerson(req.body.accountId, {
       first_name: req.body.first,
       last_name: req.body.last,
       person_token: req.body.person.account_token
     });
     //.catch((e) =>  standardCatch(res, e, { acct }, "person (create callback)"));
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       data: "person added before update"
-    });
+    });*/
     if (!person_.id) {
-      error = "person";
+      const error = "person";
       return RESSEND(res, { statusCode, statusText, error });
     }
-    const acct_ = await /*promiseCatcher(
+    var acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
-    stripe.accounts.update(acct.id, {
+    stripe.accounts.update(req.body.accountId, {
       account_token: req.body.companyAccount.account_token
     });
     //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
 
     if (!acct_.id) {
-      error = "update";
+      const error = "update";
       return RESSEND(res, { statusCode, statusText, error });
     }
     RESSEND(res, {
       statusCode,
       statusText,
-      status: "person added account acct.id"
+      status: "person added account acct.id " + acct_.id
     });
-    /*const store = {
-      //invoice_prefix: customer.invoice_prefix,
-      name,
-      id: acct_.id
-      //customerId: cus.id
-      //cardholderId: ich.id
-      //accountLink
-    };
-    if (!store.id) {
-      error = "link";
+    if (!acct_.id) {
+      const error = "link";
       return RESSEND(res, { statusCode, statusText, error });
     }
 
     const accLink =
       /*promiseCatcher( r,
-                        "accountLink",* /
+                        "accountLink",*/
       await stripe.accountLinks.create({
-        account: store.id, //: 'acct_1032D82eZvKYlo2C',
-        return_url: origin, // + "/prompt=" + req.body.uid,
-        refresh_url: origin, //just delete the ones unlinked. redo
-        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
-        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
-        //collect: "eventually_due"
+        account: acct_.id, //: 'acct_1032D82eZvKYlo2C',
+        return_url: origin,
+        refresh_url: origin,
         type: "account_onboarding"
       });
     //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
     if (!accLink.url) {
-      error = "accountLink";
+      const error = "accountLink";
       return RESSEND(res, { statusCode, statusText, error });
     }
     lastLink = accLink.url;
     //name, id, customerId, cardholderId
-    store.accountLink = accLink;
+    acct_.accountLink = accLink;
 
     RESSEND(res, {
       statusCode,
       statusText: "successful accountLink",
-      account: store
-    });*/
+      account: acct_
+    });
   })
   .post("/delete", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
@@ -764,6 +681,82 @@ attach
       statusText,
       data: "ok deleted"
     });
+  })
+  .post("/purchase", async (req, res) => {
+    //"Cannot setHeader headers after they are sent to the client"
+    var origin = refererOrigin(req, res);
+    //RESSEND(res, { statusCode, statusText, data: "ok without headers" });
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    //Cannot set headers after they are sent to the client
+    var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
+
+    if (
+      deleteThese &&
+      deleteThese.constructor === Array &&
+      deleteThese.length > 0
+    ) {
+      Promise.all(
+        deleteThese.map(
+          async (x) =>
+            await new Promise((r) =>
+              stripe.accounts.del(x).then(async () => {
+                r("{}");
+              })
+            )
+        )
+      ).catch((err) => {
+        console.log("delete error: ", err.message);
+        return err;
+      });
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok deleted"
+      });
+    }
+    var error = null;
+    /**
+     * Begin process accounts and customer creation
+     *
+     *
+     */
+    //account_token: body.newAccount.account_token
+    //https://stripe.com/docs/connect/account-tokens
+    //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
+    //dangerous; assumes one: storeId-kv (without newAccount field)
+    //RESSEND(res,);
+    if (!req.body.newAccount)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no newAccount",
+        body: req.body
+      });
+    const name = req.body.newAccount.business_profile.mcc,
+      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
+        type: req.body.type,
+        country: req.body.country,
+        ...req.body.newAccount
+      });
+    //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
+    /*RESSEND(res, {
+      statusCode,
+      statusText,
+      data: "account added before person"
+    });*/ RESSEND(
+      res,
+      {
+        statusCode,
+        statusText,
+        account: acct
+      }
+    );
   })
   .post("/join", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
