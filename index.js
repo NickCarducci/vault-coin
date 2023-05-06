@@ -512,7 +512,7 @@ attach
      */
     //account_token: body.newAccount.account_token
     //https://stripe.com/docs/connect/account-tokens
-    //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
+    RESSEND(res, { statusCode, statusText, status: "ran deleter" });
     //dangerous; assumes one: storeId-kv (without newAccount field)
     //RESSEND(res,);
     if (!req.body.newAccount)
@@ -535,8 +535,7 @@ attach
       return RESSEND(res, { statusCode, statusText, error });
     }
 
-    const person_ = await /*promiseCatcher(
-                  r,
+    const person_ = await /*promiseCatcher(r,
                   "person",*/
     stripe.accounts.createPerson(acct.id, {
       first_name: req.body.first,
