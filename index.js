@@ -90,8 +90,8 @@ const firestore = getFirestore(FIREBASEADMIN),
     }
     return origin;
   },
-  allowOriginType = (origin, res, preflight) => {
-    if (!preflight || res.secure) return null;
+  allowOriginType = (origin, res) => {
+    if (res.secure) return null;
     res.setHeader("Access-Control-Allow-Origin", origin);
     //allowedOrigins[allowedOrigins.indexOf(origin)]
     res.setHeader("Content-Type", "Application/JSON");
@@ -118,7 +118,7 @@ const firestore = getFirestore(FIREBASEADMIN),
         statusCode: 401,
         error: "no access for this origin- " + req.headers.origin
       });
-    if (allowOriginType(req.headers.origin, res, true))
+    if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
@@ -711,7 +711,7 @@ attach
   .post("/join", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
-    var origin = refererOrigin(req, res, true);
+    var origin = refererOrigin(req, res);
     if (allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
