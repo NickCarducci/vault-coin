@@ -539,15 +539,11 @@ attach
       const error = "update";
       return RESSEND(res, { statusCode, statusText, error });
     }
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       status: "person added account acct.id " + acct_.id
-    });
-    if (!acct_.id) {
-      const error = "link";
-      return RESSEND(res, { statusCode, statusText, error });
-    }
+    });*/
 
     const accLink =
       /*promiseCatcher( r,
@@ -667,16 +663,17 @@ attach
         }*/
         )
       )
-        //.then(()=>{})//prefixMap
+        .then(() => {
+          RESSEND(res, {
+            statusCode,
+            statusText,
+            data: "ok deleted"
+          });
+        }) //prefixMap
         .catch((err) => {
           console.log("delete error: ", err.message);
           return err;
         });
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      data: "ok deleted"
-    });
   })
   .post("/purchase", async (req, res) => {
     //"Cannot setHeader headers after they are sent to the client"
@@ -745,14 +742,20 @@ attach
       statusCode,
       statusText,
       data: "account added before person"
-    });*/ RESSEND(
-      res,
-      {
+    });*/
+
+    if (!acct.id)
+      return RESSEND(res, {
         statusCode,
         statusText,
+        error: "no account",
         account: acct
-      }
-    );
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      account: acct
+    });
   })
   .post("/join", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
