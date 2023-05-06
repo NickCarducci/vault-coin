@@ -521,6 +521,7 @@ attach
         error: "no newAccount",
         body: req.body
       });
+    RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
       acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
         .create({
@@ -537,7 +538,6 @@ attach
       return RESSEND(res, { statusCode, statusText, error });
     }
 
-    RESSEND(res, { statusCode, statusText, data: "ok before person" });
     const person_ = await /*promiseCatcher(
                   r,
                   "person",*/
