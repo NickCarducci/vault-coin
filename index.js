@@ -103,6 +103,8 @@ const firestore = getFirestore(FIREBASEADMIN),
       "Access-Control-Request-Headers"
     ]);
     res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
+    var goAhead = true;
+    if (!goAhead) return true;
     //if (!res.secure) return true;
     //https://stackoverflow.com/questions/12027187/difference-between-allow-and-access-control-allow-methods-in-http-response-h
   },
