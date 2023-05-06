@@ -474,7 +474,7 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
-    RESSEND(res, { statusCode, statusText, data: "ok without headers" });
+    return RESSEND(res, { statusCode, statusText, data: "ok without headers" });
     //Cannot set headers after they are sent to the client
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
@@ -521,15 +521,12 @@ attach
         body: req.body
       });
     const name = req.body.newAccount.business_profile.mcc,
-      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
-        .create({
-          type: req.body.type,
-          country: req.body.country,
-          ...req.body.newAccount
-        })
-        .catch((e) =>
-          standardCatch(res, e, { body: req.body }, "account (create callback)")
-        );
+      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
+        type: req.body.type,
+        country: req.body.country,
+        ...req.body.newAccount
+      });
+    //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
     //RESSEND(res, { statusCode, statusText, data: "ok before person" });
     if (!acct.id) {
       error = "account";
@@ -539,15 +536,12 @@ attach
     const person_ = await /*promiseCatcher(
                   r,
                   "person",*/
-    stripe.accounts
-      .createPerson(acct.id, {
-        first_name: req.body.first,
-        last_name: req.body.last,
-        person_token: req.body.person.account_token
-      })
-      .catch((e) =>
-        standardCatch(res, e, { acct }, "person (create callback)")
-      );
+    stripe.accounts.createPerson(acct.id, {
+      first_name: req.body.first,
+      last_name: req.body.last,
+      person_token: req.body.person.account_token
+    });
+    //.catch((e) =>  standardCatch(res, e, { acct }, "person (create callback)"));
 
     if (!person_.id) {
       error = "person";
@@ -556,13 +550,10 @@ attach
     const acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
-    stripe.accounts
-      .update(acct.id, {
-        account_token: req.body.companyAccount.account_token
-      })
-      .catch((e) =>
-        standardCatch(res, e, { acct }, "account (update callback)")
-      );
+    stripe.accounts.update(acct.id, {
+      account_token: req.body.companyAccount.account_token
+    });
+    //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
 
     if (!acct_.id) {
       error = "update";
@@ -584,19 +575,16 @@ attach
       /*promiseCatcher(
                         r,
                         "accountLink",*/
-      await stripe.accountLinks
-        .create({
-          account: store.id, //: 'acct_1032D82eZvKYlo2C',
-          return_url: origin, // + "/prompt=" + req.body.uid,
-          refresh_url: origin, //just delete the ones unlinked. redo
-          //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
-          //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
-          //collect: "eventually_due"
-          type: "account_onboarding"
-        })
-        .catch((e) =>
-          standardCatch(res, e, { acct }, "account (update callback)")
-        );
+      await stripe.accountLinks.create({
+        account: store.id, //: 'acct_1032D82eZvKYlo2C',
+        return_url: origin, // + "/prompt=" + req.body.uid,
+        refresh_url: origin, //just delete the ones unlinked. redo
+        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
+        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
+        //collect: "eventually_due"
+        type: "account_onboarding"
+      });
+    //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
     if (!accLink.url) {
       error = "accountLink";
       return RESSEND(res, { statusCode, statusText, error });
