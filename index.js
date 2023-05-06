@@ -674,13 +674,15 @@ attach
         return_url:
           origin +
           "?" +
-          Object.keys(obj).map(
-            (key, i) =>
-              key +
-              "=" +
-              obj[key] +
-              (i !== Object.keys(obj).length - 1 ? "&" : "")
-          ),
+          String(
+            Object.keys(obj).map(
+              (key, i) =>
+                key +
+                "=" +
+                obj[key] +
+                (i !== Object.keys(obj).length - 1 ? "&" : "")
+            )
+          ).replaceAll(",", ""),
         refresh_url: origin,
         type: "account_onboarding"
       });
