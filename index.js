@@ -663,9 +663,10 @@ attach
       status: "person added account acct.id " + acct_.id
     });*/
     const obj = {
-      stripe: acct_.id,
-      mcc: req.body.mcc
-    };
+        stripe: acct_.id,
+        mcc: req.body.mcc
+      },
+      obj1 = { ...obj, redo: true };
     const accLink =
       /*promiseCatcher( r,
                         "accountLink",*/
@@ -683,7 +684,18 @@ attach
                 (i !== Object.keys(obj).length - 1 ? "&" : "")
             )
           ).replaceAll(",", ""),
-        refresh_url: origin,
+        refresh_url:
+          origin +
+          "?" +
+          String(
+            Object.keys(obj1).map(
+              (key, i) =>
+                key +
+                "=" +
+                obj[key] +
+                (i !== Object.keys(obj1).length - 1 ? "&" : "")
+            )
+          ).replaceAll(",", ""),
         type: "account_onboarding"
       });
     //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
