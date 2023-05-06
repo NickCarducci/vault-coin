@@ -512,7 +512,7 @@ attach
      */
     //account_token: body.newAccount.account_token
     //https://stripe.com/docs/connect/account-tokens
-    RESSEND(res, { statusCode, statusText, status: "ran deleter" });
+    //RESSEND(res, { statusCode, statusText, status: "ran deleter" });
     //dangerous; assumes one: storeId-kv (without newAccount field)
     //RESSEND(res,);
     if (!req.body.newAccount)
@@ -560,6 +560,11 @@ attach
       error = "update";
       return RESSEND(res, { statusCode, statusText, error });
     }
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      status: "person added account acct.id"
+    });
     const store = {
       //invoice_prefix: customer.invoice_prefix,
       name,
