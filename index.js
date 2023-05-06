@@ -465,16 +465,16 @@ attach
     end({ bankId: bank.id });
   })*/
   .post("/purchase", async (req, res) => {
-    //Can you call to resolve an asynchronous function from Express middleware that's
-    //declared in the Node.js process' scope?
+    //"Cannot setHeader headers after they are sent to the client"
     var origin = refererOrigin(req, res);
+    //RESSEND(res, { statusCode, statusText, data: "ok without headers" });
     if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
         statusText,
         progress: "yet to surname factor digit counts.."
       });
-    return RESSEND(res, { statusCode, statusText, data: "ok without headers" });
+
     //Cannot set headers after they are sent to the client
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
@@ -571,9 +571,9 @@ attach
       error = "link";
       return RESSEND(res, { statusCode, statusText, error });
     }
+
     const accLink =
-      /*promiseCatcher(
-                        r,
+      /*promiseCatcher( r,
                         "accountLink",*/
       await stripe.accountLinks.create({
         account: store.id, //: 'acct_1032D82eZvKYlo2C',
