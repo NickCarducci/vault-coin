@@ -82,6 +82,14 @@ const firestore = getFirestore(FIREBASEADMIN),
     res.send(e);
     //res.end();
   },
+  refererOrigin = (req, res) => {
+    var origin = req.query.origin;
+    if (!origin) {
+      origin = req.headers.origin;
+      //"no newaccount made body",  //...printObject(req) //: origin + " " + (storeId ? "storeId" : "")
+    }
+    return origin;
+  },
   allowOriginType = (origin, res, preflight) => {
     if (!preflight || res.secure) return null;
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -399,17 +407,6 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       }
     };
   };
-const requirebody = (req, res) =>
-    !req.body ? RESSEND(res, failOpening(req, "account")) : {},
-  originbody = (req, res, body) => {
-    var origin = req.query.origin;
-    if (!origin) {
-      origin = req.headers.origin;
-      body && requirebody(req, res);
-      //"no newaccount made body",  //...printObject(req) //: origin + " " + (storeId ? "storeId" : "")
-    }
-    return origin;
-  };
 attach
   .post("/add", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -470,14 +467,14 @@ attach
   .post("/purchase", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
-    RESSEND(res, { statusCode, statusText, data: "ok without headers" });
-    var origin = originbody(req, res, true);
-    /*if (allowOriginType(origin, res))
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
         statusText,
         progress: "yet to surname factor digit counts.."
-      });*/
+      });
+    RESSEND(res, { statusCode, statusText, data: "ok without headers" });
     //Cannot set headers after they are sent to the client
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
@@ -617,8 +614,8 @@ attach
   .post("/delete", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
-    var origin = originbody(req, res, true);
-    if (allowOriginType(origin, res))
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
         statusText,
@@ -726,7 +723,7 @@ attach
   .post("/join", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
     //declared in the Node.js process' scope?
-    var origin = originbody(req, res, true);
+    var origin = refererOrigin(req, res, true);
     if (allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
