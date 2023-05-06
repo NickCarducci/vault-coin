@@ -466,6 +466,49 @@ attach
     });
     end({ bankId: bank.id });
   })*/
+
+  .post("/gui", async (req, res) => {
+    //"Cannot setHeader headers after they are sent to the client"
+    var origin = refererOrigin(req, res);
+    //RESSEND(res, { statusCode, statusText, data: "ok without headers" });
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    if (!req.body.accountId) {
+      const error = "link";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+
+    const accLink =
+      /*promiseCatcher( r,
+                      "accountLink",*/
+      await stripe.accountLinks.create({
+        account: req.body.accountId, //: 'acct_1032D82eZvKYlo2C',
+        return_url: origin, // + "/prompt=" + req.body.uid,
+        refresh_url: origin, //just delete the ones unlinked. redo
+        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
+        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
+        //collect: "eventually_due"
+        type: "account_onboarding"
+      });
+    //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
+    if (!accLink.url) {
+      const error = "accountLink";
+      return RESSEND(res, { statusCode, statusText, error });
+    }
+    //name, id, customerId, cardholderId
+    //store.accountLink = accLink;
+
+    RESSEND(res, {
+      statusCode,
+      statusText: "successful accountLink",
+      account: { accountLink: accLink, id: req.body.accountId }
+    });
+  })
   .post("/purchase", async (req, res) => {
     //"Cannot setHeader headers after they are sent to the client"
     var origin = refererOrigin(req, res);
@@ -529,7 +572,11 @@ attach
         ...req.body.newAccount
       });
     //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
-    //RESSEND(res, { statusCode, statusText, data: "ok before person" });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      data: "account added before person"
+    });
     if (!acct.id) {
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
@@ -565,7 +612,7 @@ attach
       statusText,
       status: "person added account acct.id"
     });
-    const store = {
+    /*const store = {
       //invoice_prefix: customer.invoice_prefix,
       name,
       id: acct_.id
@@ -580,7 +627,7 @@ attach
 
     const accLink =
       /*promiseCatcher( r,
-                        "accountLink",*/
+                        "accountLink",* /
       await stripe.accountLinks.create({
         account: store.id, //: 'acct_1032D82eZvKYlo2C',
         return_url: origin, // + "/prompt=" + req.body.uid,
@@ -603,7 +650,7 @@ attach
       statusCode,
       statusText: "successful accountLink",
       account: store
-    });
+    });*/
   })
   .post("/delete", async (req, res) => {
     //Can you call to resolve an asynchronous function from Express middleware that's
