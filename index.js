@@ -477,6 +477,8 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
+    //Cannot set headers after they are sent to the client
+    RESSEND(res, { statusCode, statusText, data: "ok afer headers" });
     var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
 
     if (
@@ -521,7 +523,6 @@ attach
         error: "no newAccount",
         body: req.body
       });
-    RESSEND(res, { statusCode, statusText, data: "ok before account" });
     const name = req.body.newAccount.business_profile.mcc,
       acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
         .create({
