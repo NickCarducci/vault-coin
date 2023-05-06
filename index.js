@@ -572,11 +572,11 @@ attach
         ...req.body.newAccount
       });
     //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       data: "account added before person"
-    });
+    });*/
     if (!acct.id) {
       error = "account";
       return RESSEND(res, { statusCode, statusText, error });
@@ -590,7 +590,11 @@ attach
       person_token: req.body.person.account_token
     });
     //.catch((e) =>  standardCatch(res, e, { acct }, "person (create callback)"));
-
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      data: "person added before update"
+    });
     if (!person_.id) {
       error = "person";
       return RESSEND(res, { statusCode, statusText, error });
