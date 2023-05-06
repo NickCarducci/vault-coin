@@ -537,6 +537,7 @@ attach
       return RESSEND(res, { statusCode, statusText, error });
     }
 
+    RESSEND(res, { statusCode, statusText, data: "ok before person" });
     const person_ = await /*promiseCatcher(
                   r,
                   "person",*/
@@ -554,7 +555,6 @@ attach
       error = "person";
       return RESSEND(res, { statusCode, statusText, error });
     }
-    RESSEND(res, { statusCode, statusText, data: "ok after person" });
     const acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
