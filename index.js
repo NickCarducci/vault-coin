@@ -510,6 +510,14 @@ attach
     });
   })
   .post("/beneficiary", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    //RESSEND(res, { statusCode, statusText, data: "ok without headers" });
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
     const person_ = await /*promiseCatcher(r,
                   "person",*/
     stripe.accounts.createPerson(req.body.accountId, {
@@ -732,12 +740,15 @@ attach
         body: req.body
       });
     const name = req.body.newAccount.business_profile.mcc,
-      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts.create({
-        type: req.body.type,
-        country: req.body.country,
-        ...req.body.newAccount
-      });
-    //.catch((e) => standardCatch(res, e, { body: req.body }, "account (create callback)"));
+      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
+        .create({
+          type: req.body.type,
+          country: req.body.country,
+          ...req.body.newAccount
+        })
+        .catch((e) =>
+          standardCatch(res, e, { body: req.body }, "account (create callback)")
+        );
     /*RESSEND(res, {
       statusCode,
       statusText,
