@@ -91,18 +91,18 @@ const firestore = getFirestore(FIREBASEADMIN),
     return origin;
   },
   allowOriginType = (origin, res) => {
-    if (res.secure) return null;
     res.setHeader("Access-Control-Allow-Origin", origin);
-    //allowedOrigins[allowedOrigins.indexOf(origin)]
-    res.setHeader("Content-Type", "Application/JSON");
-    res.setHeader("Allow", ["POST", "OPTIONS", "GET"]);
+    res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
     res.setHeader("Access-Control-Allow-Headers", [
       "Content-Type",
       "Access-Control-Request-Method",
       "Access-Control-Request-Methods",
       "Access-Control-Request-Headers"
     ]);
-    res.setHeader("Access-Control-Allow-Methods", ["POST", "OPTIONS", "GET"]);
+    if (res.secure) return null;
+    //allowedOrigins[allowedOrigins.indexOf(origin)]
+    res.setHeader("Allow", ["POST", "OPTIONS", "GET"]);
+    res.setHeader("Content-Type", "Application/JSON");
     var goAhead = true;
     if (!goAhead) return true;
     //if (!res.secure) return true;
