@@ -545,8 +545,7 @@ attach
     });
   }*/
     //deleteThese = accounts.data;
-    deleteThese &&
-      deleteThese.constructor === Array &&
+    if (deleteThese && deleteThese.constructor === Array) {
       Promise.all(
         deleteThese.map(
           async (x) =>
@@ -571,12 +570,14 @@ attach
             data: "ok deleted"
           });
         }) //prefixMap
-        .catch((err) => {
-          console.log("delete error: ", err.message);
-          return err;
-        });
+        .catch((e) => standardCatch(res, e, {}, "account (delete callback)"));
+    } else
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "none to delete"
+      });
   })
-
   .post("/gui", async (req, res) => {
     //"Cannot setHeader headers after they are sent to the client"
     var origin = refererOrigin(req, res);
@@ -672,18 +673,7 @@ attach
                         "accountLink",*/
       await stripe.accountLinks.create({
         account: acct_.id, //: 'acct_1032D82eZvKYlo2C',
-        return_url:
-          origin +
-          "?" +
-          String(
-            Object.keys(obj).map(
-              (key, i) =>
-                key +
-                "=" +
-                obj[key] +
-                (i !== Object.keys(obj).length - 1 ? "&" : "")
-            )
-          ).replaceAll(",", ""),
+        return_url: origin,
         refresh_url:
           origin +
           "?" +
