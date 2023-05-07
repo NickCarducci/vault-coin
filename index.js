@@ -667,7 +667,7 @@ attach
         stripe: acct_.id,
         mcc: req.body.mcc
       },
-      obj1 = { ...obj, redo: true };
+      obj1 = { ...obj, redo: "true" };
     const accLink =
       /*promiseCatcher( r,
                         "accountLink",*/
