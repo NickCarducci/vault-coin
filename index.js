@@ -440,14 +440,18 @@ attach
     const cus = await /*promiseCatcher(
         r,
         "customer",*/
-    stripe.customers.create(req.body.customer);
+    stripe.customers
+      .create(req.body.customer)
+      .catch((e) => standardCatch(res, e, {}, "customer (create callback)"));
     if (!cus.id) {
       return RESSEND(res, failOpening(req, "customer"));
     }
     const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
-    stripe.issuing.cardholders.create(req.body.cardholder);
+    stripe.issuing.cardholders
+      .create(req.body.cardholder)
+      .catch((e) => standardCatch(res, e, {}, "cardholder (create callback)"));
     if (!ich.id) {
       return RESSEND(res, failOpening(req, "cardholder"));
     }
@@ -485,15 +489,19 @@ attach
     const accLink =
       /*promiseCatcher( r,
                       "accountLink",*/
-      await stripe.accountLinks.create({
-        account: req.body.accountId, //: 'acct_1032D82eZvKYlo2C',
-        return_url: origin, // + "/prompt=" + req.body.uid,
-        refresh_url: origin, //just delete the ones unlinked. redo
-        //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
-        //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
-        //collect: "eventually_due"
-        type: "account_onboarding"
-      });
+      await stripe.accountLinks
+        .create({
+          account: req.body.accountId, //: 'acct_1032D82eZvKYlo2C',
+          return_url: origin, // + "/prompt=" + req.body.uid,
+          refresh_url: origin, //just delete the ones unlinked. redo
+          //`https://vault-co.in?refresh=${store.id}&origin=${origin}`, //account.id
+          //"The collect parameter is not valid when creating an account link of type `account_onboarding` for a Standard account."
+          //collect: "eventually_due"
+          type: "account_onboarding"
+        })
+        .catch((e) =>
+          standardCatch(res, e, {}, "accountLink (create callback)")
+        );
     //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
     if (!accLink.url) {
       const error = "accountLink";
@@ -631,12 +639,13 @@ attach
       });
     const person_ = await /*promiseCatcher(r,
                   "person",*/
-    stripe.accounts.createPerson(req.body.accountId, {
-      first_name: req.body.first,
-      last_name: req.body.last,
-      person_token: req.body.person.account_token
-    });
-    //.catch((e) =>  standardCatch(res, e, { acct }, "person (create callback)"));
+    stripe.accounts
+      .createPerson(req.body.accountId, {
+        first_name: req.body.first,
+        last_name: req.body.last,
+        person_token: req.body.person.account_token
+      })
+      .catch((e) => standardCatch(res, e, {}, "person (create callback)"));
     /*RESSEND(res, {
       statusCode,
       statusText,
@@ -649,10 +658,13 @@ attach
     var acct_ = await /*promiseCatcher(
                   r,
                   "update",*/
-    stripe.accounts.update(req.body.accountId, {
-      account_token: req.body.companyAccount.account_token
-    });
-    //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
+    stripe.accounts
+      .update(req.body.accountId, {
+        account_token: req.body.companyAccount.account_token
+      })
+      .catch((e) =>
+        standardCatch(res, e, { person_ }, "account (update callback)")
+      );
 
     if (!acct_.id) {
       const error = "update";
@@ -1059,9 +1071,9 @@ const payout = async (req, res, cb, name) => {
         method,
         amount: req.body.total,
         currency: req.body.currency,
-        destination: req.body.cardId,
+        destination: req.body.cardId, //added bank or "default"
         //stripeAccount: req.body.storeId,
-        source_type: req.body.source_type
+        source_type: req.body.source_type //"bank_account" "card"
       },
       {
         //https://stripe.com/docs/connect/manual-payouts#regular-payouts
