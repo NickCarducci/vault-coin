@@ -99,7 +99,7 @@ const firestore = getFirestore(FIREBASEADMIN),
       "Access-Control-Request-Methods",
       "Access-Control-Request-Headers"
     ]);
-    if (res.secure) return null;
+    //if (res.secure) return null;
     //allowedOrigins[allowedOrigins.indexOf(origin)]
     res.setHeader("Allow", ["POST", "OPTIONS", "GET"]);
     res.setHeader("Content-Type", "Application/JSON");
