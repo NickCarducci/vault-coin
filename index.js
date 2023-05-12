@@ -439,7 +439,7 @@ attach
         progress: "yet to surname factor digit counts.."
       });
 
-    RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
+    //RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
     const cus = await /*promiseCatcher(
         r,
         "customer",*/
