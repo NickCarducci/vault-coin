@@ -431,10 +431,12 @@ attach
     );
   })
   .post("/buy", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
+        statusText,
+        progress: "yet to surname factor digit counts.."
       });
 
     const cus = await /*promiseCatcher(
