@@ -439,21 +439,20 @@ attach
         progress: "yet to surname factor digit counts.."
       });
 
+    RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
     const cus = await /*promiseCatcher(
         r,
         "customer",*/
-    stripe.customers
-      .create(req.body.customer)
-      .catch((e) => standardCatch(res, e, {}, "customer (create callback)"));
+    stripe.customers.create(req.body.customer);
+    //.catch((e) => standardCatch(res, e, {}, "customer (create callback)"));
     if (!cus.id) {
       return RESSEND(res, failOpening(req, "customer"));
     }
     const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
-    stripe.issuing.cardholders
-      .create(req.body.cardholder)
-      .catch((e) => standardCatch(res, e, {}, "cardholder (create callback)"));
+    stripe.issuing.cardholders.create(req.body.cardholder);
+    //.catch((e) => standardCatch(res, e, {}, "cardholder (create callback)"));
     if (!ich.id) {
       return RESSEND(res, failOpening(req, "cardholder"));
     }
