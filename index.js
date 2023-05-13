@@ -784,11 +784,6 @@ attach
       });
 
     var error = null;
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      data: "no work"
-    });
     /**
      * Begin process accounts and customer creation
      *
