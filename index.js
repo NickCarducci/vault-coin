@@ -638,9 +638,15 @@ attach
         deleteThese.map(
           async (x) =>
             await new Promise((r) =>
-              stripe.accounts.del(x).then(async () => {
-                r("{}");
-              })
+              stripe.accounts
+                .del(x)
+                .then(async () => {
+                  r("{}");
+                })
+                .catch((e) => {
+                  const done = JSON.stringify(e);
+                  return r(done);
+                })
             )
           /*async (x) => {
           try {
