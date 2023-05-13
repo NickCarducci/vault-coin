@@ -410,6 +410,36 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     };
   };
 attach
+  .post("/list", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    const paymentMethods = await stripe.paymentMethods
+      .list({
+        customer: req.body.customerId,
+        type: req.body.bankcard //"card"
+      })
+      .catch((e) =>
+        standardCatch(res, e, {}, "payment methods (list callback)")
+      );
+
+    if (!paymentMethods.data)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go paymentMethods list"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      paymentMethods: paymentMethods.data
+    });
+  })
   .post("/add", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
