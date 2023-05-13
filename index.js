@@ -564,6 +564,11 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      data: "no work"
+    });
     /*return res.send({
     statusCode,
     statusText,
