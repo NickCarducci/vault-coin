@@ -564,11 +564,6 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      data: "no work"
-    });
     /*return res.send({
     statusCode,
     statusText,
@@ -603,9 +598,10 @@ attach
       });
     return null;*/
     }; //Just do on front end
-    req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
-      prefixMap(merchantSurnamePrefix);
-    });
+    req.body.merchantSurnamePrefixes &&
+      req.body.merchantSurnamePrefixes.forEach((merchantSurnamePrefix) => {
+        prefixMap(merchantSurnamePrefix);
+      });
     /*RESSEND(res, {
     statusCode,
     statusText,
