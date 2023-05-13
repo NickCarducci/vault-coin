@@ -816,13 +816,13 @@ attach
       data: "account added before person"
     });*/
 
-    /*if (!acct.id)
+    if (!acct.id)
       return RESSEND(res, {
         statusCode,
         statusText,
         error: "no account",
         account: acct
-      });*/
+      });
     RESSEND(res, {
       statusCode,
       statusText,
@@ -1443,3 +1443,7 @@ function exitHandler(exited, exitCode) {
 } //bind declare (this,update) when listened on:
 process.on("uncaughtException", exitHandler.bind(null, { mounted: true }));
 process.on("exit", exitHandler.bind(null, { clean: true }));
+function errorHandler(err, req, res, next) {
+  console.log("Oops", err);
+}
+app.use(errorHandler);
