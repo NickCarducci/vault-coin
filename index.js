@@ -816,13 +816,13 @@ attach
       data: "account added before person"
     });*/
 
-    if (!acct.id)
+    /*if (!acct.id)
       return RESSEND(res, {
         statusCode,
         statusText,
         error: "no account",
         account: acct
-      });
+      });*/
     RESSEND(res, {
       statusCode,
       statusText,
