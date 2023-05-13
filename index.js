@@ -195,7 +195,7 @@ issue
     }; //make a custom(er) account
     await stripe.issuing.cards
       .create(newCard)
-      .then(async (card) => await addCard(req, res, card)) //customer: res.body.storeId
+      .then(async (card) => await addCardBank(req, res, card)) //customer: res.body.storeId
       //payment_method:card.id https://stripe.com/docs/api/setup_intents/create
       .catch((e) => standardCatch(res, e, {}, "create customer"));
   })
@@ -214,11 +214,11 @@ issue
     };
     await stripe.issuing.cards
       .create(fresh)
-      .then(async (card) => await addCard(req, res, card))
+      .then(async (card) => await addCardBank(req, res, card))
       .catch((e) => standardCatch(res, e, {}, "forge anew"));
   }); //no use within a month so
 // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-const writeCard = async (req, res, newStore, cb) =>
+const writeCardBank = async (req, res, newStore, cb) =>
     await stripe.paymentMethods
       .create(newStore)
       .then(async (method) => {
@@ -238,7 +238,7 @@ const writeCard = async (req, res, newStore, cb) =>
   serializeCard = (req, cardId) => {
     return { req, cardId: !cardId ? req.body.storeId : cardId };
   },
-  addCard = async ({ req, cardId } = serializeCard, res, name) =>
+  addCardBank = async ({ req, cardId } = serializeCard, res, name) =>
     await stripe.setupIntents
       .create({
         customer: req.body.customerId,
@@ -411,14 +411,45 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
   };
 attach
   .post("/add", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
         statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
+        statusText,
+        progress: "yet to surname factor digit counts.."
       });
-    await writeCard(req, res, cardOptions(req), (cardId) =>
-      addCard((req, cardId), res, "add")
-    );
+    //Are Stripe Bank and Card Elements being deprecated for sources' deprecation?
+    if (!req.body.bankcard)
+      return await writeCardBank(req, res, cardOptions(req), (cardId) =>
+        addCardBank((req, cardId), res, "add")
+      );
+
+    /*const bankcard = await stripe.customers.createSource(req.body.customer, {
+      source: req.body.bankcardtoken
+    });
+    if (!bankcard.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go bankcard source create"
+      });*/
+
+    const setupIntent = await stripe.setupIntents.create({
+      payment_method_types: [req.body.bankcard] //"card","us_bank_account"
+      //https://stripe.com/docs/api/setup_intents/create
+    });
+
+    if (!setupIntent.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go setupIntent create"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      setupIntent
+    });
   })
   .post("/pay", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -426,7 +457,7 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    writeCard(req, res, cardOptions(req), (cardId) =>
+    writeCardBank(req, res, cardOptions(req), (cardId) =>
       pay((req, cardId), res, "pay")
     );
   })
@@ -1117,7 +1148,7 @@ disburse
       "degrade"
     ); //https://stripe.com/docs/api/payouts/create
   });
-//payout, addCard
+//payout, addCardBank
 fill
   .post("/scope", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -1157,7 +1188,7 @@ fill
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    writeCard(req, res, cardOptions(req), (cardId) => {
+    writeCardBank(req, res, cardOptions(req), (cardId) => {
       //https://stripe.com/docs/api/payouts/create
       payout((req, cardId), res, () => {}, "create payout"); //newPayout
     });
