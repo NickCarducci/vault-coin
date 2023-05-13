@@ -434,11 +434,15 @@ attach
         error: "no go bankcard source create"
       });*/
 
-    const setupIntent = await stripe.setupIntents.create({
-      confirm: true,
-      payment_method_types: [req.body.bankcard] //"card","us_bank_account"
-      //https://stripe.com/docs/api/setup_intents/create
-    });
+    const setupIntent = await stripe.setupIntents
+      .create({
+        confirm: true,
+        payment_method_types: [req.body.bankcard] //"card","us_bank_account"
+        //https://stripe.com/docs/api/setup_intents/create
+      })
+      .catch((e) =>
+        standardCatch(res, e, {}, "setup intents (create callback)")
+      );
 
     if (!setupIntent.id)
       return RESSEND(res, {
