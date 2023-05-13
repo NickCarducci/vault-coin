@@ -634,37 +634,36 @@ attach
   }*/
     //deleteThese = accounts.data;
     if (deleteThese && deleteThese.constructor === Array) {
-      Promise.all(
-        deleteThese.map(
-          async (x) =>
-            await new Promise((r) =>
-              stripe.accounts
-                .del(x)
-                .then(async () => {
-                  r("{}");
-                })
-                .catch((e) => {
-                  const done = JSON.stringify(e);
-                  return r(done);
-                })
-            )
-          /*async (x) => {
+      //Promise.all(
+      deleteThese.map(
+        async (x) =>
+          // await new Promise(
+          //async (r) =>
+          await stripe.accounts.del(x)
+        /*.then(async () => {
+                    r("{}");
+                  })
+                  .catch((e) => {
+                    const done = JSON.stringify(e);
+                    return r(done);
+                  })*/
+
+        /*async (x) => {
           try {
             return deletethisone(x);
           } catch (e) {
             RESSEND(res, failOpening(req, "accounts"));
           }
         }*/
-        )
-      )
-        .then(() => {
-          RESSEND(res, {
-            statusCode,
-            statusText,
-            data: "ok deleted"
-          });
-        }) //prefixMap
-        .catch((e) => standardCatch(res, e, {}, "account (delete callback)"));
+      );
+      //.then(() => {
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok deleted"
+      });
+      //}) //prefixMap
+      //.catch((e) => standardCatch(res, e, {}, "account (delete callback)"));
     } else
       RESSEND(res, {
         statusCode,
