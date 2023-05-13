@@ -635,27 +635,30 @@ attach
   }*/
     //deleteThese = accounts.data;
     if (deleteThese && deleteThese.constructor === Array) {
-      //Promise.all(
-      deleteThese.map(
-        async (x) =>
-          // await new Promise(
-          //async (r) =>
-          await stripe.accounts.del(x)
-        /*.then(async () => {
+      Promise.all(
+        deleteThese.map(
+          async (x) =>
+            await new Promise(
+              async (r) =>
+                await stripe.accounts
+                  .del(x)
+                  .then(async () => {
                     r("{}");
                   })
                   .catch((e) => {
                     const done = JSON.stringify(e);
                     return r(done);
-                  })*/
+                  })
 
-        /*async (x) => {
+              /*async (x) => {
           try {
             return deletethisone(x);
           } catch (e) {
             RESSEND(res, failOpening(req, "accounts"));
           }
         }*/
+            )
+        )
       );
       //.then(() => {
       RESSEND(res, {
@@ -727,35 +730,38 @@ attach
     const accLink =
       /*promiseCatcher( r,
                         "accountLink",*/
-      await stripe.accountLinks.create({
-        account: acct_.id, //: 'acct_1032D82eZvKYlo2C',
-        return_url:
-          origin +
-          "?" +
-          String(
-            Object.keys(obj).map(
-              (key, i) =>
-                key +
-                "=" +
-                obj[key] +
-                (i !== Object.keys(obj).length - 1 ? "&" : "")
-            )
-          ).replaceAll(",", ""),
-        refresh_url:
-          origin +
-          "?" +
-          String(
-            Object.keys(obj1).map(
-              (key, i) =>
-                key +
-                "=" +
-                obj[key] +
-                (i !== Object.keys(obj1).length - 1 ? "&" : "")
-            )
-          ).replaceAll(",", ""),
-        type: "account_onboarding"
-      });
-    //.catch((e) => standardCatch(res, e, { acct }, "account (update callback)"));
+      await stripe.accountLinks
+        .create({
+          account: acct_.id, //: 'acct_1032D82eZvKYlo2C',
+          return_url:
+            origin +
+            "?" +
+            String(
+              Object.keys(obj).map(
+                (key, i) =>
+                  key +
+                  "=" +
+                  obj[key] +
+                  (i !== Object.keys(obj).length - 1 ? "&" : "")
+              )
+            ).replaceAll(",", ""),
+          refresh_url:
+            origin +
+            "?" +
+            String(
+              Object.keys(obj1).map(
+                (key, i) =>
+                  key +
+                  "=" +
+                  obj[key] +
+                  (i !== Object.keys(obj1).length - 1 ? "&" : "")
+              )
+            ).replaceAll(",", ""),
+          type: "account_onboarding"
+        })
+        .catch((e) =>
+          standardCatch(res, e, { acct_ }, "accountLink (create callback)")
+        );
     if (!accLink.url) {
       const error = "accountLink";
       return RESSEND(res, { statusCode, statusText, error });
@@ -777,33 +783,6 @@ attach
         progress: "yet to surname factor digit counts.."
       });
 
-    //Cannot set headers after they are sent to the client
-    var deleteThese = req.body.deleteThese; // ["acct_1MkydPGfCRSE0xBF"]; //sandbox only! ("acct_")
-
-    if (
-      deleteThese &&
-      deleteThese.constructor === Array &&
-      deleteThese.length > 0
-    ) {
-      Promise.all(
-        deleteThese.map(
-          async (x) =>
-            await new Promise((r) =>
-              stripe.accounts.del(x).then(async () => {
-                r("{}");
-              })
-            )
-        )
-      ).catch((err) => {
-        console.log("delete error: ", err.message);
-        return err;
-      });
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        data: "ok deleted"
-      });
-    }
     var error = null;
     /**
      * Begin process accounts and customer creation
@@ -822,16 +801,15 @@ attach
         error: "no newAccount",
         body: req.body
       });
-    const name = req.body.newAccount.business_profile.mcc,
-      acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
-        .create({
-          type: req.body.type,
-          country: req.body.country,
-          ...req.body.newAccount
-        })
-        .catch((e) =>
-          standardCatch(res, e, { body: req.body }, "account (create callback)")
-        );
+    const acct = await /*promiseCatcher(r, "create",*/ stripe.accounts
+      .create({
+        type: req.body.type,
+        country: req.body.country,
+        ...req.body.newAccount
+      })
+      .catch((e) =>
+        standardCatch(res, e, { body: req.body }, "account (create callback)")
+      );
     /*RESSEND(res, {
       statusCode,
       statusText,
