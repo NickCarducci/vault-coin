@@ -443,6 +443,33 @@ attach
       paymentMethods: paymentMethods.data
     });
   })
+  .post("/balance", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    const cashBalance = await stripe.customer
+      .retrieveCashBalance(req.body.customerId)
+      .catch((e) =>
+        standardCatch(res, e, {}, "cash balance (retrieve callback)")
+      );
+
+    if (!cashBalance.available)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go cashBalance retrieve"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      cashBalance
+    });
+  })
   .post("/add", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
