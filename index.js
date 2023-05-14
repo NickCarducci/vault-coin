@@ -452,7 +452,7 @@ attach
         progress: "yet to surname factor digit counts.."
       });
 
-    const cashBalance = await stripe.customer
+    const cashBalance = await stripe.customers
       .retrieveCashBalance(req.body.customerId)
       .catch((e) =>
         standardCatch(res, e, {}, "cash balance (retrieve callback)")
