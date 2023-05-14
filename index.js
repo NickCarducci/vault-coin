@@ -149,7 +149,6 @@ const firestore = getFirestore(FIREBASEADMIN),
   attach = express.Router(),
   report = express.Router(),
   disburse = express.Router(),
-  actions = express.Router(),
   database = express.Router(),
   cors = require("cors"),
   stripe = require("stripe")(process.env.STRIPE_SECRET);
@@ -217,96 +216,7 @@ issue
       .then(async (card) => await addCardBank(req, res, card))
       .catch((e) => standardCatch(res, e, {}, "forge anew"));
   }); //no use within a month so
-// https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-const writeCardBank = async (req, res, newStore, cb) =>
-    await stripe.paymentMethods
-      .create(newStore)
-      .then(async (method) => {
-        await stripe.paymentMethods
-          .attach(method.id, {
-            customer: req.body.customerId
-          })
-          .then(async (same) => {
-            cb(method.id);
-          })
-          .catch((e) =>
-            standardCatch(res, e, { newStore, method }, "attach card")
-          );
-      })
-      .catch((e) => standardCatch(res, e, newStore, "create card")),
-  //-pay -out "intent" deferred
-  serializeCard = (req, cardId) => {
-    return { req, cardId: !cardId ? req.body.storeId : cardId };
-  },
-  addCardBank = async ({ req, cardId } = serializeCard, res, name) =>
-    await stripe.setupIntents
-      .create({
-        customer: req.body.customerId,
-        payment_method_types: ["card"],
-        payment_method: cardId //https://stripe.com/docs/api/setup_intents/create
-      }) //storeID  //trustValueIssueId
-      .then(async (newIntent) => {
-        //const newIntent = "seti_1McfOX2eZvKYlo2CrdZza7Cc"
-        await stripe.setupIntents
-          .confirm(newIntent.id, {
-            payment_method: cardId // "pm_card_visa"
-          })
-          .then(() => {
-            RESSEND(res, {
-              statusCode,
-              statusText,
-              cardId
-            });
-          })
-          .catch((e) =>
-            standardCatch(res, e, { newIntent }, "confirm " + name)
-          );
-      })
-      .catch((e) => standardCatch(res, e, { cardId }, "create " + name)),
-  serializePayment = (req, cardId) => {
-    return {
-      req,
-      newPay: {
-        //setup_future_usage: true,
-        customer: req.body.customerId,
-        payment_method: !cardId ? req.body.storeId : cardId, //method.id,
-        amount: req.body.total, //2000,
-        currency: req.body.currency ? req.body.currency : "usd",
-        //https://stripe.com/docs/connect/destination-charges
-        automatic_payment_methods: { enabled: true },
-        //Do you need to report rolling over investment accounts as a 1031 exchange to yourself?
-        //Are Stripe Connect manual interval customer payment intents paid out in
-        //3 year intervals ascending? Does each payment need to rollover to keep the
-        //payout from the account from happening?
-        transfer_data: {
-          destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
-        }
-      }
-    };
-  },
-  pay = async ({ req, newPay } = serializePayment, res, name) => {
-    await stripe.paymentIntents
-      .create(newPay)
-      .then(async (pay) => {
-        // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-        await stripe.paymentIntents
-          .confirm(pay.id, {
-            //setup_future_usage: "on_session",//method without a customer..
-            payment_method: req.body.storeId //"pm_card_visa" methodId
-          })
-          .then((payment) => {
-            RESSEND(res, {
-              statusCode,
-              statusText,
-              payment
-            });
-          })
-          .catch((e) =>
-            standardCatch(res, e, { newPay, pay }, "confirm " + name)
-          );
-      })
-      .catch((e) => standardCatch(res, e, newPay, "create " + name));
-  };
+
 var mccIdTimeouts = {},
   mccIdTimeoutNames = [];
 const cancel = async (req, res) => {
@@ -381,6 +291,22 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       }
     };
   },
+  writeCardBank = async (req, res, newStore, cb) =>
+    await stripe.paymentMethods
+      .create(newStore)
+      .then(async (method) => {
+        await stripe.paymentMethods
+          .attach(method.id, {
+            customer: req.body.customerId
+          })
+          .then(async (same) => {
+            cb(method.id);
+          })
+          .catch((e) =>
+            standardCatch(res, e, { newStore, method }, "attach card")
+          );
+      })
+      .catch((e) => standardCatch(res, e, newStore, "create card")),
   cardOptions = (req) => {
     return {
       type: req.body.type, //"customer_balance"//"us_bank_account" "card"
@@ -408,6 +334,83 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
         name: req.body.name
       }
     };
+  }, // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
+  //-pay -out "intent" deferred
+  serializeCard = (req, cardId) => {
+    return { req, cardId: !cardId ? req.body.storeId : cardId };
+  },
+  addCardBank = async ({ req, cardId } = serializeCard, res, name) =>
+    await stripe.setupIntents
+      .create({
+        customer: req.body.customerId,
+        payment_method_types: ["card"],
+        payment_method: cardId //https://stripe.com/docs/api/setup_intents/create
+      }) //storeID  //trustValueIssueId
+      .then(async (newIntent) => {
+        //const newIntent = "seti_1McfOX2eZvKYlo2CrdZza7Cc"
+        await stripe.setupIntents
+          .confirm(newIntent.id, {
+            payment_method: cardId // "pm_card_visa"
+          })
+          .then(() => {
+            RESSEND(res, {
+              statusCode,
+              statusText,
+              cardId
+            });
+          })
+          .catch((e) =>
+            standardCatch(res, e, { newIntent }, "confirm " + name)
+          );
+      })
+      .catch((e) => standardCatch(res, e, { cardId }, "create " + name)),
+  serializePayment = (req, cardId) => {
+    const payment_method = !cardId ? req.body.paymentMethod : cardId;
+    var newPay = {
+      //setup_future_usage: true,
+      customer: req.body.customerId,
+      payment_method, //method.id,
+      amount: req.body.total, //2000,
+      currency: req.body.currency ? req.body.currency : "usd",
+      //https://stripe.com/docs/connect/destination-charges
+      automatic_payment_methods: { enabled: true },
+      //Do you need to report rolling over investment accounts as a 1031 exchange to yourself?
+      //Are Stripe Connect manual interval customer payment intents paid out in
+      //3 year intervals ascending? Does each payment need to rollover to keep the
+      //payout from the account from happening?
+      transfer_data: {
+        destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
+      }
+    };
+    if (!payment_method) newPay.confirm = true;
+    //customer.default_source
+    return {
+      req,
+      newPay
+    };
+  },
+  pay = async ({ req, newPay } = serializePayment, res, name) => {
+    await stripe.paymentIntents
+      .create(newPay)
+      .then(async (pay) => {
+        // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
+        await stripe.paymentIntents
+          .confirm(pay.id, {
+            //setup_future_usage: "on_session",//method without a customer..
+            payment_method: req.body.paymentMethod //"pm_card_visa" methodId
+          })
+          .then((payment) => {
+            RESSEND(res, {
+              statusCode,
+              statusText,
+              payment
+            });
+          })
+          .catch((e) =>
+            standardCatch(res, e, { newPay, pay }, "confirm " + name)
+          );
+      })
+      .catch((e) => standardCatch(res, e, newPay, "create " + name));
   };
 attach
   .post("/list", async (req, res) => {
@@ -494,7 +497,49 @@ attach
     writeCardBank(req, res, cardOptions(req), (cardId) =>
       pay((req, cardId), res, "pay")
     );
+  }) //online marketplace (facility), either you give or product
+  .post("/give", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    //https://stripe.com/docs/api/payment_intents/create
+    //automatic_payment_methods: { enabled: true }
+    //confirm: true  //confirm API params may be provided
+    // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
+    pay((req, null), res, "pay");
+  }) //payment-purchase
+  .post("/w2", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    //Is a wage an hourly salary? Is a salary always monthly?
+    pay((req, null), res, "w2");
   })
+  .post("/advance", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    pay((req, null), res, "advance");
+  })
+  //Can a business pay in excess of mark to market prices to later pay back their
+  //limited partnership with tax free income instead of
+  //just 80% net operating loss carry back refunds, forward deductions, and
+  //near 100% over state usury level interest?
+  /*.post("/loan", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    const principal = req.body.loan;
+    pay((req, null), res, "loan as interest");
+  })*/
   .post("/buy", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
@@ -1416,51 +1461,8 @@ report
       })
       .catch((e) => standardCatch(res, e, {}, "buildlogs integrity"));
   });
-actions
-  .post("/purchase", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
-      });
-    //https://stripe.com/docs/api/payment_intents/create
-    //automatic_payment_methods: { enabled: true }
-    //confirm: true  //confirm API params may be provided
-    // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-    pay((req, null), res, "pay");
-  }) //payment-purchase
-  .post("/w2", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
-      });
-    //Is a wage an hourly salary? Is a salary always monthly?
-    pay((req, null), res, "w2");
-  })
-  .post("/advance", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
-      });
-    pay((req, null), res, "advance");
-  })
-  //Can a business pay in excess of mark to market prices to later pay back their
-  //limited partnership with tax free income instead of
-  //just 80% net operating loss carry back refunds, forward deductions, and
-  //near 100% over state usury level interest?
-  .post("/loan", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
-      });
-    const principal = req.body.loan;
-    pay((req, null), res, "loan as interest");
-  });
 //https://stackoverflow.com/questions/31928417/chaining-multiple-pieces-of-middleware-for-specific-route-in-expressjs
-app.use(nonbody, issue, attach, disburse, fill, database, report, actions); //methods on express.Router() or use a scoped instance
+app.use(nonbody, issue, attach, disburse, fill, database, report); //methods on express.Router() or use a scoped instance
 app.listen(port, () => console.log(`localhost:${port}`));
 process.stdin.resume(); //so the program will not close instantly
 function exitHandler(exited, exitCode) {
