@@ -567,6 +567,50 @@ attach
     const principal = req.body.loan;
     pay((req, null), res, "loan as interest");
   })*/
+  .post("/cardholder", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    //RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
+    const ich = await /*promiseCatcher(
+    r,
+    "cardholder",*/
+    stripe.issuing.cardholders
+      .create(req.body.cardholder)
+      .catch((e) => standardCatch(res, e, {}, "cardholder (create callback)"));
+    if (!ich.id) {
+      return RESSEND(res, failOpening(req, "cardholder"));
+    }
+
+    RESSEND(res, { statusCode, statusText, cardholder: ich });
+  })
+  .post("/customer", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    //RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
+    const cus = await /*promiseCatcher(
+        r,
+        "customer",*/
+    stripe.customers
+      .create(req.body.customer)
+      .catch((e) => standardCatch(res, e, {}, "customer (create callback)"));
+    if (!cus.id) {
+      return RESSEND(res, failOpening(req, "customer"));
+    }
+
+    RESSEND(res, { statusCode, statusText, customer: cus });
+  })
   .post("/buy", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
