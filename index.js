@@ -941,7 +941,7 @@ attach
       status: "person added account acct.id " + acct_.id
     });*/
     const obj = {
-        stripe: acct_.id,
+        [req.body.type === "custom" ? "stripecustom" : "stripe"]: acct_.id,
         mcc: req.body.mcc
       },
       obj1 = { ...obj, redo: "true" };
