@@ -194,7 +194,7 @@ issue
     }; //make a custom(er) account
     await stripe.issuing.cards
       .create(newCard)
-      .then(async (card) => await addCardBank(req, res, card)) //customer: res.body.storeId
+      .then(async (card) => await setupIntent(req, res, card)) //customer: res.body.storeId
       //payment_method:card.id https://stripe.com/docs/api/setup_intents/create
       .catch((e) => standardCatch(res, e, {}, "create customer"));
   })
@@ -213,7 +213,7 @@ issue
     };
     await stripe.issuing.cards
       .create(fresh)
-      .then(async (card) => await addCardBank(req, res, card))
+      .then(async (card) => await setupIntent(req, res, card))
       .catch((e) => standardCatch(res, e, {}, "forge anew"));
   }); //no use within a month so
 
@@ -232,7 +232,7 @@ const subscription = async (req, res) => {
   //https://stripe.com/docs/api/subscriptions/create
   const masterId = ""; //acct
   // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-  //pay(req, res, newPurchase, "pay");
+  //payIntent(req, res, newPurchase, "pay");
   //confirm: true  //confirm API params may be provided
   //https://stripe.com/docs/api/products/list
   const product = await stripe.products.create({
@@ -291,7 +291,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       }
     };
   },
-  writeCardBank = async (req, res, newStore, cb) =>
+  declarePaymentMethod = async (req, res, newStore, cb) =>
     await stripe.paymentMethods
       .create(newStore)
       .then(async (method) => {
@@ -307,7 +307,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
           );
       })
       .catch((e) => standardCatch(res, e, newStore, "create card")),
-  cardOptions = (req) => {
+  optionsPayments = (req) => {
     return {
       type: req.body.type, //"customer_balance"//"us_bank_account" "card"
       ...(req.body.type === "card"
@@ -339,7 +339,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
   serializeCard = (req, cardId) => {
     return { req, cardId: !cardId ? req.body.storeId : cardId };
   },
-  addCardBank = async ({ req, cardId } = serializeCard, res, name) =>
+  setupIntent = async ({ req, cardId } = serializeCard, res, name) =>
     await stripe.setupIntents
       .create({
         customer: req.body.customerId,
@@ -383,19 +383,22 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       }
     };
     if (!payment_method) newPay.confirm = true;
+    Object.keys(newPay).forEach((key) => {
+      if (!newPay[key]) delete newPay[key];
+    });
     //customer.default_source
     return {
       req,
       newPay
     };
   },
-  pay = async ({ req, newPay } = serializePayment, res, name) => {
+  payIntent = async ({ req, newPay } = serializePayment, res, name) => {
     await stripe.paymentIntents
       .create(newPay)
-      .then(async (pay) => {
+      .then(async (payIntent) => {
         // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
         await stripe.paymentIntents
-          .confirm(pay.id, {
+          .confirm(payIntent.id, {
             //setup_future_usage: "on_session",//method without a customer..
             payment_method: req.body.paymentMethod //"pm_card_visa" methodId
           })
@@ -407,7 +410,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
             });
           })
           .catch((e) =>
-            standardCatch(res, e, { newPay, pay }, "confirm " + name)
+            standardCatch(res, e, { newPay, payIntent }, "confirm " + name)
           );
       })
       .catch((e) => standardCatch(res, e, newPay, "create " + name));
@@ -470,6 +473,64 @@ attach
       cashBalance
     });
   })
+  .post("/generate", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    /*const source = await stripe.sources.create({
+      type: "ach_credit_transfer",
+      currency: "usd",
+      owner: {
+        email: "jenny.rosen@example.com"
+      }
+    });*/
+    //https://stripe.com/docs/treasury/account-management/platform-financial-account
+    //https://stripe.com/docs/treasury/account-management/connected-accounts
+    /*const intent = await stripe.paymentIntents.create({
+      amount: 1099,
+      currency: "usd",
+      customer: req.body.customerId,
+      payment_method_types: ["customer_balance"],
+      payment_method_data: {
+        type: "customer_balance"
+      },
+      payment_method_options: {
+        customer_balance: {
+          funding_type: "bank_transfer",
+          bank_transfer: {
+            type: "gb_bank_transfer"
+          }
+        }
+      }
+    });*/
+    const financialAccount = await stripe.treasury.financialAccounts.create({
+      supported_currencies: ["usd"],
+      features: {
+        card_issuing: { reqested: true },
+        inbound_transfers: { ach: { requested: true } },
+        intra_stripe_flows: { reqested: true },
+        outbound_payments: {
+          ach: { reqested: true }
+        }
+      }
+    });
+    if (!financialAccount.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go setupIntent create"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      financialAccount
+    });
+  })
   .post("/add", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
@@ -480,10 +541,12 @@ attach
       });
     //Are Stripe Bank and Card Elements being deprecated for sources' deprecation?
     if (!req.body.bankcard)
-      return await writeCardBank(req, res, cardOptions(req), (cardId) =>
-        addCardBank((req, cardId), res, "add")
+      return await declarePaymentMethod(
+        req,
+        res,
+        optionsPayments(req),
+        (cardId) => setupIntent((req, cardId), res, "add")
       );
-
     /*const bankcard = await stripe.customers.createSource(req.body.customer, {
       source: req.body.bankcardtoken
     });
@@ -494,6 +557,9 @@ attach
         error: "no go bankcard source create"
       });*/
 
+    //this just uses a client secret
+    //for the front end to make a
+    //setup intent
     const setupIntent = await stripe.setupIntents
       .create({
         payment_method_types: [req.body.bankcard] //"card","us_bank_account"
@@ -521,22 +587,16 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    writeCardBank(req, res, cardOptions(req), (cardId) =>
-      pay((req, cardId), res, "pay")
+    declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
+      payIntent((req, cardId), res, "pay")
     );
   }) //online marketplace (facility), either you give or product
-  .post("/give", async (req, res) => {
-    if (allowOriginType(req.headers.origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText: "not a secure origin-referer-to-host protocol"
-      });
-    //https://stripe.com/docs/api/payment_intents/create
-    //automatic_payment_methods: { enabled: true }
-    //confirm: true  //confirm API params may be provided
-    // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
-    pay((req, null), res, "pay");
-  }) //payment-purchase
+  //https://stripe.com/docs/api/payment_intents/create
+  //automatic_payment_methods: { enabled: true }
+  //confirm: true  //confirm API params may be provided
+  // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
+  //payment-purchase
+
   .post("/w2", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
@@ -544,7 +604,7 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
     //Is a wage an hourly salary? Is a salary always monthly?
-    pay((req, null), res, "w2");
+    payIntent((req, null), res, "w2");
   })
   .post("/advance", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -552,7 +612,7 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    pay((req, null), res, "advance");
+    payIntent((req, null), res, "advance");
   })
   //Can a business pay in excess of mark to market prices to later pay back their
   //limited partnership with tax free income instead of
@@ -565,7 +625,7 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
     const principal = req.body.loan;
-    pay((req, null), res, "loan as interest");
+    payIntent((req, null), res, "loan as interest");
   })*/
   .post("/cardholder", async (req, res) => {
     var origin = refererOrigin(req, res);
@@ -1282,7 +1342,7 @@ disburse
       "degrade"
     ); //https://stripe.com/docs/api/payouts/create
   });
-//payout, addCardBank
+//payout, setupIntent
 fill
   .post("/scope", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -1322,7 +1382,7 @@ fill
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    writeCardBank(req, res, cardOptions(req), (cardId) => {
+    declarePaymentMethod(req, res, optionsPayments(req), (cardId) => {
       //https://stripe.com/docs/api/payouts/create
       payout((req, cardId), res, () => {}, "create payout"); //newPayout
     });
