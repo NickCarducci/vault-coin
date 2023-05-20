@@ -295,16 +295,19 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     await stripe.paymentMethods
       .create(newStore)
       .then(async (method) => {
-        await stripe.paymentMethods
-          .attach(method.id, {
-            customer: req.body.customerId
-          })
-          .then(async (same) => {
-            cb(method.id);
-          })
-          .catch((e) =>
-            standardCatch(res, e, { newStore, method }, "attach card")
-          );
+        if (!req.body.customerId) {
+          cb(method.id);
+        } else
+          await stripe.paymentMethods
+            .attach(method.id, {
+              customer: req.body.customerId
+            })
+            .then(async (same) => {
+              cb(method.id);
+            })
+            .catch((e) =>
+              standardCatch(res, e, { newStore, method }, "attach card")
+            );
       })
       .catch((e) => standardCatch(res, e, newStore, "create card")),
   optionsPayments = (req) => {
@@ -581,14 +584,14 @@ attach
       setupIntent
     });
   })
-  .post("/pay", async (req, res) => {
+  .post("/paynow", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
     declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
-      payIntent((req, cardId), res, "pay")
+      payIntent((req, cardId), res, "pay now")
     );
   }) //online marketplace (facility), either you give or product
   //https://stripe.com/docs/api/payment_intents/create
@@ -597,6 +600,15 @@ attach
   // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
   //payment-purchase
 
+  .post("/pay", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    //Is a wage an hourly salary? Is a salary always monthly?
+    payIntent((req, null), res, "pay");
+  })
   .post("/w2", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
