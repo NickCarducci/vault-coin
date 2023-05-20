@@ -324,7 +324,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
           } //newCard
         : {
             us_bank_account: {
-              account_holder_type: "company", //"individual"
+              account_holder_type: req.body.company, //"individual"
               account_number: req.body.account,
               account_type: "checking", //"savings"
               routing_number: req.body.routing
@@ -940,6 +940,10 @@ attach
       statusText,
       status: "person added account acct.id " + acct_.id
     });*/
+    if (req.body.type === "custom")
+      declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
+        payIntent((req, cardId), res, "pay now")
+      );
     const obj = {
         [req.body.type === "custom" ? "stripecustom" : "stripe"]: acct_.id,
         mcc: req.body.mcc
