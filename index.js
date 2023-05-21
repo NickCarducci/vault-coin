@@ -176,7 +176,7 @@ var statusCode = 200,
   statusText = "ok";
 //https://support.stripe.com/questions/know-your-customer-(kyc)-requirements-for-connected-accounts
 issue
-  .post("/customer", async (req, res) => {
+  .post("/issue", async (req, res) => {
     //submit that information using the Stripe API
     //vau.money/docs
     //https://stripe.com/docs/connect/identity-verification-api
@@ -196,7 +196,7 @@ issue
       .create(newCard)
       .then(async (card) => await setupIntent(req, res, card)) //customer: res.body.storeId
       //payment_method:card.id https://stripe.com/docs/api/setup_intents/create
-      .catch((e) => standardCatch(res, e, {}, "create customer"));
+      .catch((e) => standardCatch(res, e, {}, "create issue"));
   })
   .post("/redo", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
