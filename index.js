@@ -458,22 +458,25 @@ attach
         progress: "yet to surname factor digit counts.."
       });
 
-    const cashBalance = await stripe.customers
+    const balance = await stripe.balance.retrieve({
+      stripeAccount: req.body.storeId
+    });
+    /*const cashBalance = await stripe.customers
       .retrieveCashBalance(req.body.customerId)
       .catch((e) =>
         standardCatch(res, e, {}, "cash balance (retrieve callback)")
-      );
+      );*/
 
-    if (!cashBalance.available)
+    if (!balance.available)
       return RESSEND(res, {
         statusCode,
         statusText,
-        error: "no go cashBalance retrieve"
+        error: "no go balance retrieve"
       });
     RESSEND(res, {
       statusCode,
       statusText,
-      cashBalance
+      balance
     });
   })
   .post("/generate", async (req, res) => {
