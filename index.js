@@ -765,7 +765,8 @@ attach
           statusCode,
           statusText,
           customer: cus,
-          cardholder: ich
+          cardholder: ich,
+          subscription: subscription.id
         });
       }
     );
@@ -947,6 +948,60 @@ attach
         statusCode,
         statusText,
         data: "none to delete"
+      });
+  })
+  .post("/unsub", async (req, res) => {
+    //Can you call to resolve an asynchronous function from Express middleware that's
+    //declared in the Node.js process' scope?
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    //'sub_1NACa3GVa6IKUDzpbBHWB11C'
+    var unSubThese = req.body.unSubThese;
+    if (unSubThese && unSubThese.constructor === Array) {
+      Promise.all(
+        unSubThese.map(
+          async (x) =>
+            await new Promise(
+              async (r) =>
+                await stripe.subscriptions
+                  .del(x)
+                  .then(async () => {
+                    r("{}");
+                  })
+                  .catch((e) => {
+                    const done = JSON.stringify(e);
+                    return r(done);
+                  })
+
+              /*async (x) => {
+      try {
+        return deletethisone(x);
+      } catch (e) {
+        RESSEND(res, failOpening(req, "accounts"));
+      }
+    }*/
+            )
+        )
+      );
+      //.then(() => {
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok unsubbed"
+      });
+      //}) //prefixMap
+      //.catch((e) => standardCatch(res, e, {}, "account (delete callback)"));
+    } else
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "none to unSub"
       });
   })
   .post("/beneficiary", async (req, res) => {
