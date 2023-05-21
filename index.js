@@ -766,7 +766,7 @@ attach
           statusText,
           customer: cus,
           cardholder: ich,
-          subscription: subscription.id
+          subscription: subscription
         });
       }
     );
