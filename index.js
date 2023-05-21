@@ -706,9 +706,9 @@ attach
       return RESSEND(res, failOpening(req, "customer"));
     }
     declarePaymentMethod(
-      req,
+      { ...req, customerId: cus.id },
       res,
-      optionsPayments({ ...req, customerId: cus.id }),
+      optionsPayments(req),
       async (cardId) => {
         //payIntent((req, cardId), res, "pay now");
 
