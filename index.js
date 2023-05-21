@@ -706,7 +706,7 @@ attach
       return RESSEND(res, failOpening(req, "customer"));
     }
     declarePaymentMethod(
-      { ...req, customerId: cus.id },
+      { body: { ...req.body, customerId: cus.id } },
       res,
       optionsPayments(req),
       async (cardId) => {
