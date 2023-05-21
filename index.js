@@ -176,6 +176,41 @@ var statusCode = 200,
   statusText = "ok";
 //https://support.stripe.com/questions/know-your-customer-(kyc)-requirements-for-connected-accounts
 issue
+  .post("/updateaddress", async (req, res) => {
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+
+    const account = await stripe.accounts.update(req.body.storeId, {
+      business_profile: { support_address: req.body.address }
+    });
+
+    if (!account.data)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go paymentMethods list"
+      });
+
+    const person = await stripe.accounts.updatePerson(
+      account.id,
+      req.body.personId,
+      { address: req.body.address }
+    );
+    if (!person.data)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go paymentMethods list"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      paymentMethods: account.data
+    });
+  })
   .post("/issue", async (req, res) => {
     //submit that information using the Stripe API
     //vau.money/docs
@@ -1099,7 +1134,7 @@ attach
     RESSEND(res, {
       statusCode,
       statusText: "successful accountLink",
-      account: { id: acct_.id, accountLink: accLink }
+      account: { id: acct_.id, accountLink: accLink, person: person_ }
     });
   })
   .post("/purchase", async (req, res) => {
