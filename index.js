@@ -190,7 +190,8 @@ issue
     const newCard = {
       cardholder: req.body.cardholderId,
       currency: "usd",
-      type: req.body.type
+      type: req.body.type,
+      shipping: { address: req.body.address, name: req.body.name }
     }; //make a custom(er) account
     await stripe.issuing.cards
       .create(newCard)
