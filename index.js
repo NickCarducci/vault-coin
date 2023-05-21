@@ -705,10 +705,14 @@ attach
     if (!cus.id) {
       return RESSEND(res, failOpening(req, "customer"));
     }
-    declarePaymentMethod(req, res, optionsPayments(req), async (cardId) => {
-      //payIntent((req, cardId), res, "pay now");
+    declarePaymentMethod(
+      req,
+      res,
+      optionsPayments({ ...req, customerId: cus.id }),
+      async (cardId) => {
+        //payIntent((req, cardId), res, "pay now");
 
-      /*const price = await stripe.prices.create({
+        /*const price = await stripe.prices.create({
         unit_amount: 2000,
         currency: 'usd',
         recurring: {interval: 'month'},
@@ -719,46 +723,52 @@ attach
         return RESSEND(res, failOpening(req, "price"));
       }*/
 
-      const subscription = await stripe.subscriptions.create({
-        customer: cus.id,
-        items: [
-          {
-            price_data: {
-              currency: "usd",
-              product: "prod_NvpVIn9i6jPmrb",
-              unit_amount_decimal: "2.99",
-              recurring: {
-                interval: "month",
-                interval_count: "1"
-              }
-            },
-            quantity: "1"
+        const subscription = await stripe.subscriptions.create({
+          customer: cus.id,
+          items: [
+            {
+              price_data: {
+                currency: "usd",
+                product: "prod_NvpVIn9i6jPmrb",
+                unit_amount_decimal: "2.99",
+                recurring: {
+                  interval: "month",
+                  interval_count: "1"
+                }
+              },
+              quantity: "1"
+            }
+          ],
+          //on_behalf_of: "acct_1N7lC0Gg4Sg1xxEQ",
+          default_payment_method: cardId,
+          expand: ["latest_invoice.payment_intent"],
+          transfer_data: {
+            destination: "acct_1N7lC0Gg4Sg1xxEQ"
           }
-        ],
-        //on_behalf_of: "acct_1N7lC0Gg4Sg1xxEQ",
-        default_payment_method: cardId,
-        expand: ["latest_invoice.payment_intent"],
-        transfer_data: {
-          destination: "acct_1N7lC0Gg4Sg1xxEQ"
+        });
+        if (!subscription.id) {
+          return RESSEND(res, failOpening(req, "cardholder"));
         }
-      });
-      if (!subscription.id) {
-        return RESSEND(res, failOpening(req, "cardholder"));
-      }
-      const ich = await /*promiseCatcher(
+        const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
-      stripe.issuing.cardholders
-        .create(req.body.cardholder)
-        .catch((e) =>
-          standardCatch(res, e, {}, "cardholder (create callback)")
-        );
-      if (!ich.id) {
-        return RESSEND(res, failOpening(req, "cardholder"));
-      }
+        stripe.issuing.cardholders
+          .create(req.body.cardholder)
+          .catch((e) =>
+            standardCatch(res, e, {}, "cardholder (create callback)")
+          );
+        if (!ich.id) {
+          return RESSEND(res, failOpening(req, "cardholder"));
+        }
 
-      RESSEND(res, { statusCode, statusText, customer: cus, cardholder: ich });
-    });
+        RESSEND(res, {
+          statusCode,
+          statusText,
+          customer: cus,
+          cardholder: ich
+        });
+      }
+    );
   })
   /*.post("/assess", async (req, res) => {
     //assessment (the) paymentMethod "link" to account
