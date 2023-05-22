@@ -1461,7 +1461,7 @@ const payout = async (req, res, cb, name) => {
     .create(
       {
         method,
-        amount: req.body.total,
+        amount: Number(req.body.total),
         currency: req.body.currency,
         destination: req.body.cardId, //added bank or "default"
         //stripeAccount: req.body.storeId,
