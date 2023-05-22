@@ -191,7 +191,7 @@ issue
       return RESSEND(res, {
         statusCode,
         statusText,
-        error: "no go paymentMethods list"
+        error: "no go account update"
       });
 
     const person = await stripe.accounts.updatePerson(
@@ -203,7 +203,7 @@ issue
       return RESSEND(res, {
         statusCode,
         statusText,
-        error: "no go paymentMethods list"
+        error: "no go person update"
       });
     RESSEND(res, {
       statusCode,
@@ -629,6 +629,11 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      total: req.body.total
+    });
     declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
       payIntent((req, cardId), res, "pay now")
     );
