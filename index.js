@@ -654,53 +654,60 @@ attach
       total: req.body.total
     });*/
 
-    const token = await stripe.tokens.create(
-      req.body.type === "bank_account"
-        ? {
-            bank_account: {
-              country: req.body.address.country,
-              currency: "usd",
-              account_holder_type: req.body.company,
-              account_holder_name: req.body.name,
-              routing_number: req.body.routing,
-              account_number: req.body.account
+    //This bank account is not verified.
+    //You'll need to attach a customer and verify the bank account. For more information, see
+    //https://stripe.com/docs/guides/ach#manually-collecting-and-verifying-bank-accounts
+    const token = await stripe.tokens
+      .create(
+        req.body.type === "bank_account"
+          ? {
+              bank_account: {
+                country: req.body.address.country,
+                currency: "usd",
+                account_holder_type: req.body.company,
+                account_holder_name: req.body.name,
+                routing_number: req.body.routing,
+                account_number: req.body.account
+              }
             }
-          }
-        : {
-            card: {
-              currency: "usd",
-              number: req.body.primary,
-              exp_month: req.body.exp_month,
-              exp_year: req.body.exp_year,
-              cvc: req.body.cvc,
-              ...Object.keys(req.body.address).map((key) => {
-                return {
-                  ["address_" + key]: req.body.address[key]
-                };
-              })
+          : {
+              card: {
+                currency: "usd",
+                number: req.body.primary,
+                exp_month: req.body.exp_month,
+                exp_year: req.body.exp_year,
+                cvc: req.body.cvc,
+                ...Object.keys(req.body.address).map((key) => {
+                  return {
+                    ["address_" + key]: req.body.address[key]
+                  };
+                })
+              }
             }
-          }
-    );
+      )
+      .catch((e) => standardCatch(res, e, {}, "token (create callback)"));
     if (!token.id)
       return RESSEND(res, {
         statusCode,
         statusText,
         error: "no go balance retrieve"
       });
-    const charge = await stripe.charges.create({
-      amount: Number(req.body.total),
-      currency: "usd",
-      source: token.id,
-      description:
-        "My First Test Charge (created for API docs at https://www.stripe.com/docs/api)",
-      shipping: {
-        address: req.body.address,
-        name: req.body.name
-      },
-      transfer_data: {
-        destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
-      }
-    });
+    const charge = await stripe.charges
+      .create({
+        amount: Number(req.body.total),
+        currency: "usd",
+        source: token.id,
+        description:
+          "My First Test Charge (created for API docs at https://www.stripe.com/docs/api)",
+        shipping: {
+          address: req.body.address,
+          name: req.body.name
+        },
+        transfer_data: {
+          destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
+        }
+      })
+      .catch((e) => standardCatch(res, e, {}, "charge (create callback)"));
     if (!charge.id)
       return RESSEND(res, {
         statusCode,
