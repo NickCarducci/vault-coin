@@ -409,7 +409,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       //setup_future_usage: true,
       customer: req.body.customerId,
       payment_method, //method.id,
-      amount: req.body.total, //2000,
+      amount: Number(req.body.total), //2000,
       currency: req.body.currency ? req.body.currency : "usd",
       //https://stripe.com/docs/connect/destination-charges
       automatic_payment_methods: { enabled: true },
