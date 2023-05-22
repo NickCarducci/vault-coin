@@ -403,9 +403,10 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
           );
       })
       .catch((e) => standardCatch(res, e, { cardId }, "create " + name)),
-  serializePayment = (req, cardId) => {
+  serializePayment = async (res, req, cardId) => {
     const payment_method = !cardId ? req.body.paymentMethod : cardId;
-    var newPay = {
+
+    var newPay = /*{
       //setup_future_usage: true,
       customer: req.body.customerId,
       payment_method, //method.id,
@@ -420,6 +421,16 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       transfer_data: {
         destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
       }
+    };*/ {
+      amount: Number(req.body.total),
+      currency: "usd",
+      source: token.id,
+      description:
+        "My First Test Charge (created for API docs at https://www.stripe.com/docs/api)",
+      shipping: {
+        address: req.body.address,
+        name: req.body.name
+      }
     };
     if (!payment_method) newPay.confirm = true;
     Object.keys(newPay).forEach((key) => {
@@ -432,7 +443,13 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     };
   },
   payIntent = async ({ req, newPay } = serializePayment, res, name) => {
-    await stripe.paymentIntents
+    const charge = await stripe.charges.create(newPay);
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      charge
+    });
+    /*await stripe.paymentIntents
       .create(newPay)
       .then(async (payIntent) => {
         // https://stripe.com/docs/payments/payment-intents/creating-payment-intents#creating-for-automatic
@@ -452,7 +469,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
             standardCatch(res, e, { newPay, payIntent }, "confirm " + name)
           );
       })
-      .catch((e) => standardCatch(res, e, newPay, "create " + name));
+      .catch((e) => standardCatch(res, e, newPay, "create " + name));*/
   };
 attach
   .post("/list", async (req, res) => {
@@ -624,6 +641,8 @@ attach
     });
   })
   .post("/paynow", async (req, res) => {
+    //https://stripe.com/docs/api/charges/create
+    //https://stripe.com/docs/api/tokens
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
@@ -634,9 +653,63 @@ attach
       statusText,
       total: req.body.total
     });*/
-    declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
-      payIntent((req, cardId), res, "pay now")
+
+    const token = await stripe.tokens.create(
+      req.body.type === "bank_account"
+        ? {
+            bank_account: {
+              country: req.body.address.country,
+              currency: "usd",
+              account_holder_type: req.body.company,
+              account_holder_name: req.body.name,
+              routing_number: req.body.routing,
+              account_number: req.body.account
+            }
+          }
+        : {
+            card: {
+              currency: "usd",
+              number: req.body.primary,
+              exp_month: req.body.exp_month,
+              exp_year: req.body.exp_year,
+              cvc: req.body.cvc,
+              ...Object.keys(req.body.address).map((key) => {
+                return {
+                  ["address_" + key]: req.body.address[key]
+                };
+              })
+            }
+          }
     );
+    if (!token.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go balance retrieve"
+      });
+    const charge = await stripe.charges.create({
+      amount: Number(req.body.total),
+      currency: "usd",
+      source: token.id,
+      description:
+        "My First Test Charge (created for API docs at https://www.stripe.com/docs/api)",
+      shipping: {
+        address: req.body.address,
+        name: req.body.name
+      },
+      transfer_data: {
+        destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
+      }
+    });
+    if (!charge.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go balance retrieve"
+      });
+    /*declarePaymentMethod(req, res, optionsPayments(req), (cardId) =>
+      payIntent((res, req, cardId), res, "pay now")
+    );*/
   }) //online marketplace (facility), either you give or product
   //https://stripe.com/docs/api/payment_intents/create
   //automatic_payment_methods: { enabled: true }
@@ -651,7 +724,7 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
     //Is a wage an hourly salary? Is a salary always monthly?
-    payIntent((req, null), res, "pay");
+    payIntent((res, req, null), res, "pay");
   })
   .post("/w2", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -660,7 +733,7 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
     //Is a wage an hourly salary? Is a salary always monthly?
-    payIntent((req, null), res, "w2");
+    payIntent((res, req, null), res, "w2");
   })
   .post("/advance", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
@@ -668,7 +741,7 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    payIntent((req, null), res, "advance");
+    payIntent((res, req, null), res, "advance");
   })
   //Can a business pay in excess of mark to market prices to later pay back their
   //limited partnership with tax free income instead of
@@ -681,7 +754,7 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
     const principal = req.body.loan;
-    payIntent((req, null), res, "loan as interest");
+    payIntent((res,req, null), res, "loan as interest");
   })*/
   .post("/cardholder", async (req, res) => {
     var origin = refererOrigin(req, res);
@@ -751,7 +824,7 @@ attach
       res,
       optionsPayments(req),
       async (cardId) => {
-        //payIntent((req, cardId), res, "pay now");
+        //payIntent((res,req, cardId), res, "pay now");
 
         /*const price = await stripe.prices.create({
         unit_amount: 2000,
