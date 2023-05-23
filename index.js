@@ -948,32 +948,6 @@ attach
         return RESSEND(res, failOpening(req, "price"));
       }*/
 
-        const subscription = await stripe.subscriptions.create({
-          customer: cus.id,
-          items: [
-            {
-              price_data: {
-                currency: "usd",
-                product: "prod_NwsHRpBzPurHXE", //"prod_NvpVIn9i6jPmrb",
-                unit_amount_decimal: "2.99",
-                recurring: {
-                  interval: "month",
-                  interval_count: "1"
-                }
-              },
-              quantity: "1"
-            }
-          ],
-          //on_behalf_of: "acct_1N7lC0Gg4Sg1xxEQ",
-          default_payment_method: cardId,
-          expand: ["latest_invoice.payment_intent"],
-          transfer_data: {
-            destination: "acct_1N7lC0Gg4Sg1xxEQ"
-          }
-        });
-        if (!subscription.id) {
-          return RESSEND(res, failOpening(req, "cardholder"));
-        }
         const ich = await /*promiseCatcher(
     r,
     "cardholder",*/
@@ -986,6 +960,36 @@ attach
           return RESSEND(res, failOpening(req, "cardholder"));
         }
 
+        const subscription = await stripe.subscriptions
+          .create({
+            customer: cus.id,
+            items: [
+              {
+                price_data: {
+                  currency: "usd",
+                  product: "prod_NwsHRpBzPurHXE", //"prod_NvpVIn9i6jPmrb",
+                  unit_amount_decimal: "2.99",
+                  recurring: {
+                    interval: "month",
+                    interval_count: "1"
+                  }
+                },
+                quantity: "1"
+              }
+            ],
+            //on_behalf_of: "acct_1N7lC0Gg4Sg1xxEQ",
+            default_payment_method: cardId,
+            expand: ["latest_invoice.payment_intent"],
+            transfer_data: {
+              destination: "acct_1N7lC0Gg4Sg1xxEQ"
+            }
+          })
+          .catch((e) =>
+            standardCatch(res, e, {}, "subscriptions (create callback)")
+          );
+        if (!subscription.id) {
+          return RESSEND(res, failOpening(req, "subscription"));
+        }
         RESSEND(res, {
           statusCode,
           statusText,
