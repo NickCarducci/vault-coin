@@ -624,11 +624,11 @@ attach
       //https://stripe.com/docs/api/setup_intents/create
     };
 
-    if (req.body.bankcard === "us_bank_account")
+    if (false && req.body.bankcard === "us_bank_account")
       newMethod.payment_method_options = {
         us_bank_account: {
           financial_connections: {
-            permissions: ["payment_method", "balances"]
+            permissions: ["payment_method"]
           }
         }
       };
@@ -981,31 +981,6 @@ attach
     }
 
     RESSEND(res, { statusCode, statusText, customer: cus });
-  })
-  .post("/cutomer", async (req, res) => {
-    var origin = refererOrigin(req, res);
-    if (!req.body || allowOriginType(origin, res))
-      return RESSEND(res, {
-        statusCode,
-        statusText,
-        progress: "yet to surname factor digit counts.."
-      });
-
-    //RESSEND(res, { statusCode, statusText, data: "before stripe calls" });
-    const cus = await /*promiseCatcher(
-        r,
-        "customer",*/
-    stripe.customers
-      .create(req.body.customer)
-      .catch((e) => standardCatch(res, e, {}, "customer (create callback)"));
-    if (!cus.id) {
-      return RESSEND(res, failOpening(req, "customer"));
-    }
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      customer: cus
-    });
   })
   .post("/buy", async (req, res) => {
     var origin = refererOrigin(req, res);
