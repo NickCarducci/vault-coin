@@ -424,7 +424,7 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
     };*/ {
       amount: Number(req.body.total),
       currency: "usd",
-      source: token.id,
+      source: req.body.card.payment_token,
       description:
         "My First Test Charge (created for API docs at https://www.stripe.com/docs/api)",
       shipping: {
@@ -674,7 +674,7 @@ attach
       })
       .catch((e) => standardCatch(res, e, {}, "charge (create callback)"));
 
-    if (!setupIntent.client_secret)
+    if (!charge.id)
       return RESSEND(res, {
         statusCode,
         statusText,
