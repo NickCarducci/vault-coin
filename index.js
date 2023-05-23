@@ -648,6 +648,38 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
+
+    const paymentIntent = await stripe.paymentIntents
+      .create({
+        amount: req.body.total,
+        currency: "usd"
+        //payment_method_types: [req.body.bankcard] //"card","us_bank_account"
+        //https://stripe.com/docs/api/setup_intents/create
+      })
+      .catch((e) =>
+        standardCatch(res, e, {}, "setup intents (create callback)")
+      );
+
+    if (!setupIntent.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go setupIntent create"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      paymentIntent
+    });
+  })
+  .post("/paynowless", async (req, res) => {
+    //https://stripe.com/docs/api/charges/create
+    //https://stripe.com/docs/api/tokens
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
     /*RESSEND(res, {
       statusCode,
       statusText,
