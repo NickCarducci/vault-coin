@@ -650,9 +650,13 @@ attach
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
-    const setupIntent = await stripe.setupIntents.confirm(
-      req.body.seti //'seti_1N7hpKGVa6IKUDzpbIQVdahm'
-    );
+    const setupIntent = await stripe.setupIntents
+      .confirm(
+        req.body.seti //'seti_1N7hpKGVa6IKUDzpbIQVdahm'
+      )
+      .catch((e) =>
+        standardCatch(res, e, {}, "setup intents (confirm callback)")
+      );
     if (!setupIntent.id)
       return RESSEND(res, {
         statusCode,
