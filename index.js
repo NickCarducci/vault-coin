@@ -640,6 +640,64 @@ attach
       setupIntent
     });
   })
+  .post("/subnow", async (req, res) => {
+    //https://stripe.com/docs/api/charges/create
+    //https://stripe.com/docs/api/tokens
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      total: req.body.total
+    });
+    declarePaymentMethod(
+      { body: { ...req.body, customerId: cus.id } },
+      res,
+      optionsPayments(req),
+      async (cardId) => {
+        const subscription = await stripe.subscriptions.create({
+          customer: cus.id,
+          items: [
+            {
+              price_data: {
+                currency: "usd",
+                product: "prod_NwsHRpBzPurHXE", //"prod_NvpVIn9i6jPmrb",
+                unit_amount_decimal: "2.99",
+                recurring: {
+                  interval: "month",
+                  interval_count: "1"
+                }
+              },
+              quantity: "1"
+            }
+          ],
+          //on_behalf_of: "acct_1N7lC0Gg4Sg1xxEQ",
+          default_payment_method: cardId,
+          expand: ["latest_invoice.payment_intent"],
+          transfer_data: {
+            destination: "acct_1N7lC0Gg4Sg1xxEQ"
+          }
+        });
+        if (!subscription.id)
+          return RESSEND(res, {
+            statusCode,
+            statusText,
+            error: "no go subscription create"
+          });
+        RESSEND(res, {
+          statusCode,
+          statusText,
+          subscription
+        });
+      }
+    );
+  })
   .post("/paynow", async (req, res) => {
     //https://stripe.com/docs/api/charges/create
     //https://stripe.com/docs/api/tokens
@@ -896,7 +954,7 @@ attach
             {
               price_data: {
                 currency: "usd",
-                product: "prod_NvpVIn9i6jPmrb",
+                product: "prod_NwsHRpBzPurHXE", //"prod_NvpVIn9i6jPmrb",
                 unit_amount_decimal: "2.99",
                 recurring: {
                   interval: "month",
