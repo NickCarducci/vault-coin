@@ -640,6 +640,31 @@ attach
       setupIntent
     });
   })
+  .post("/confirm", async (req, res) => {
+    //https://stripe.com/docs/api/charges/create
+    //https://stripe.com/docs/api/tokens
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+    const setupIntent = await stripe.setupIntents.confirm(
+      req.body.seti //'seti_1N7hpKGVa6IKUDzpbIQVdahm'
+    );
+    if (!setupIntent.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go subscription create"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      setupIntent
+    });
+  })
   .post("/subnow", async (req, res) => {
     //https://stripe.com/docs/api/charges/create
     //https://stripe.com/docs/api/tokens
@@ -698,6 +723,38 @@ attach
       }
     );
   })
+  .post("/payout", async (req, res) => {
+    //https://stripe.com/docs/api/charges/create
+    //https://stripe.com/docs/api/tokens
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    if (allowOriginType(req.headers.origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText: "not a secure origin-referer-to-host protocol"
+      });
+
+    const payout = await stripe.payouts.create(
+      {
+        amount: req.body.total,
+        currency: "usd"
+      },
+      {
+        stripeAccount: req.body.storeId
+      }
+    );
+    if (!payout.id)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go setupIntent create"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      payout
+    });
+  })
   .post("/paynow", async (req, res) => {
     //https://stripe.com/docs/api/charges/create
     //https://stripe.com/docs/api/tokens
@@ -709,11 +766,11 @@ attach
         statusText: "not a secure origin-referer-to-host protocol"
       });
 
-    RESSEND(res, {
+    /*RESSEND(res, {
       statusCode,
       statusText,
       total: req.body.total
-    });
+    });*/
     const charge = await stripe.charges
       .create({
         amount: Number(req.body.total),
@@ -1668,7 +1725,7 @@ const payout = async (req, res, cb, name) => {
     .catch((e) => standardCatch(res, e, {}, name));
 };
 disburse
-  .post("/payout", async (req, res) => {
+  .post("/payoutless", async (req, res) => {
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
