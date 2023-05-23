@@ -619,11 +619,21 @@ attach
     //this just uses a client secret
     //for the front end to make a
     //setup intent
+    var newMethod = {
+      payment_method_types: [req.body.bankcard] //"card","us_bank_account"
+      //https://stripe.com/docs/api/setup_intents/create
+    };
+
+    if (req.body.bankcard === "us_bank_account")
+      newMethod.payment_method_options = {
+        us_bank_account: {
+          financial_connections: {
+            permissions: ["payment_method", "balances"]
+          }
+        }
+      };
     const setupIntent = await stripe.setupIntents
-      .create({
-        payment_method_types: [req.body.bankcard] //"card","us_bank_account"
-        //https://stripe.com/docs/api/setup_intents/create
-      })
+      .create(newMethod)
       .catch((e) =>
         standardCatch(res, e, {}, "setup intents (create callback)")
       );
@@ -972,7 +982,7 @@ attach
 
     RESSEND(res, { statusCode, statusText, customer: cus });
   })
-  .post("/buy", async (req, res) => {
+  .post("/cutomer", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
       return RESSEND(res, {
@@ -991,8 +1001,23 @@ attach
     if (!cus.id) {
       return RESSEND(res, failOpening(req, "customer"));
     }
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      customer: cus
+    });
+  })
+  .post("/buy", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
     declarePaymentMethod(
-      { body: { ...req.body, customerId: cus.id } },
+      { body: { ...req.body, customerId: req.body.customerId } },
       res,
       optionsPayments(req),
       async (cardId) => {
