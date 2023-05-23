@@ -657,10 +657,10 @@ attach
         //https://stripe.com/docs/api/setup_intents/create
       })
       .catch((e) =>
-        standardCatch(res, e, {}, "setup intents (create callback)")
+        standardCatch(res, e, {}, "payment intents (create callback)")
       );
 
-    if (!setupIntent.id)
+    if (!setupIntent.client_secret)
       return RESSEND(res, {
         statusCode,
         statusText,
