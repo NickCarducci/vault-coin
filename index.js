@@ -643,22 +643,36 @@ attach
   .post("/paynow", async (req, res) => {
     //https://stripe.com/docs/api/charges/create
     //https://stripe.com/docs/api/tokens
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
+    //https://stripe.com/docs/js/tokens_sources?type=paymentRequestButton
     if (allowOriginType(req.headers.origin, res))
       return RESSEND(res, {
         statusCode,
         statusText: "not a secure origin-referer-to-host protocol"
       });
 
-    const paymentIntent = await stripe.paymentIntents
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      total: req.body.total
+    });
+    const charge = await stripe.charges
       .create({
-        amount: req.body.total,
-        currency: "usd"
-        //payment_method_types: [req.body.bankcard] //"card","us_bank_account"
-        //https://stripe.com/docs/api/setup_intents/create
+        amount: Number(req.body.total),
+        currency: "usd",
+        source: req.body.card.payment_token,
+        description: "Card payment",
+        shipping: {
+          address: req.body.address,
+          name: req.body.name,
+          phone: req.body.phone
+        },
+        receipt_email: req.body.email,
+        transfer_data: {
+          destination: req.body.storeId //method.id //"{{CONNECTED_STRIPE_ACCOUNT_ID}}"
+        }
       })
-      .catch((e) =>
-        standardCatch(res, e, {}, "payment intents (create callback)")
-      );
+      .catch((e) => standardCatch(res, e, {}, "charge (create callback)"));
 
     if (!setupIntent.client_secret)
       return RESSEND(res, {
@@ -669,7 +683,7 @@ attach
     RESSEND(res, {
       statusCode,
       statusText,
-      paymentIntent
+      charge
     });
   })
   .post("/paynowless", async (req, res) => {
