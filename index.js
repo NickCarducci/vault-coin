@@ -1214,8 +1214,22 @@ attach
       accounts
     });
   }*/
+    const sinkThese = req.body.sinkThese; // []; //sandbox only! ("cus_")
+    if (sinkThese && sinkThese.constructor === Array) {
+      sinkThese.forEach(async (x) => {
+        try {
+          /*const cus = await stripe.customers.update(x, {
+            invoice_prefix: "TEST" + x.substring(0, 7)
+          });
+          if (!cus.id) return RESSEND(res, failOpening(req, "customer"));*/
+          await stripe.customers.del(x);
+        } catch (e) {
+          RESSEND(res, failOpening(req, "customer"));
+        }
+      });
+    }
     //deleteThese = accounts.data;
-    if (deleteThese && deleteThese.constructor === Array) {
+    else if (deleteThese && deleteThese.constructor === Array) {
       Promise.all(
         deleteThese.map(
           async (x) =>
