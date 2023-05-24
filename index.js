@@ -590,6 +590,22 @@ attach
       financialAccount
     });
   })
+  .post("/attach", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+    declarePaymentMethod(req, res, optionsPayments(req), (paymentId) => {
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        paymentId
+      });
+    });
+  })
   .post("/add", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
