@@ -1216,16 +1216,27 @@ attach
   }*/
     const sinkThese = req.body.sinkThese; // []; //sandbox only! ("cus_")
     if (sinkThese && sinkThese.constructor === Array) {
-      sinkThese.forEach(async (x) => {
-        try {
-          /*const cus = await stripe.customers.update(x, {
-            invoice_prefix: "TEST" + x.substring(0, 7)
-          });
-          if (!cus.id) return RESSEND(res, failOpening(req, "customer"));*/
-          await stripe.customers.del(x);
-        } catch (e) {
-          RESSEND(res, failOpening(req, "customer"));
-        }
+      Promise.all(
+        sinkThese.map(
+          async (x) =>
+            await new Promise(
+              async (r) =>
+                await stripe.customers
+                  .del(x)
+                  .then(async () => {
+                    r("{}");
+                  })
+                  .catch((e) => {
+                    const done = JSON.stringify(e);
+                    return r(done);
+                  })
+            )
+        )
+      );
+      RESSEND(res, {
+        statusCode,
+        statusText,
+        data: "ok deleted"
       });
     }
     //deleteThese = accounts.data;
