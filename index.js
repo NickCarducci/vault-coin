@@ -486,7 +486,7 @@ attach
       clientId: process.env.QBA_ID,
       clientSecret: process.env.QBA_SECRET,
       environment: "sandbox",
-      redirectUri: "https://scopes.cc"
+      redirectUri: origin //"https://scopes.cc"
       //logging: true
     });
     if (!oauthClient.authorizeUri)
