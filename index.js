@@ -542,7 +542,8 @@ attach
         statusText,
         error: "no go authResponse by oauth"
       });
-    const quickbooks_token = JSON.stringify(authResponse.getJson(), null, 2);
+    const quickbooks_token = authResponse.getJson();
+    //const quickbooks_token = JSON.stringify(authResponse.getJson(), null, 2);
     if (!quickbooks_token)
       return RESSEND(res, {
         statusCode,
