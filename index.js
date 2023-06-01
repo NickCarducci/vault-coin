@@ -489,6 +489,12 @@ attach
       redirectUri: "https://scopes.cc"
     });
 
+    if (!oauthClient)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go oauthClient new"
+      });
     var authUri = oauthClient.authorizeUri({
       scope: [OAuthClient.scopes.Accounting],
       state: "intuit-test"
@@ -498,7 +504,7 @@ attach
       return RESSEND(res, {
         statusCode,
         statusText,
-        error: "no go paymentMethods list"
+        error: "no go authUri by oauth"
       });
     RESSEND(res, {
       statusCode,
