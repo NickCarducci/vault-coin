@@ -550,10 +550,53 @@ attach
         statusText,
         error: "no go authUri by oauth"
       });
+    var companyID = oauthClient.getToken().realmId;
+
+    var url =
+      oauthClient.environment === "sandbox"
+        ? OAuthClient.environment.sandbox
+        : OAuthClient.environment.production;
+
+    const selectAccount =
+      "select * from Account where Metadata.CreateTime > '2014-12-31'";
+    const accounts = oauthClient.makeApiCall({
+      url:
+        url +
+        "v3/company/" +
+        companyID +
+        "/query?query=" +
+        selectAccount +
+        "&minorversion=40"
+    });
+    const selectVendor =
+      "select * from Account where Metadata.CreateTime > '2014-12-31'";
+    const vendors = oauthClient.makeApiCall({
+      url:
+        url +
+        "v3/company/" +
+        companyID +
+        "/query?query=" +
+        selectVendor +
+        "&minorversion=40"
+    });
+    const selectCustomer =
+      "select * from Account where Metadata.CreateTime > '2014-12-31'";
+    const customers = oauthClient.makeApiCall({
+      url:
+        url +
+        "v3/company/" +
+        companyID +
+        "/query?query=" +
+        selectCustomer +
+        "&minorversion=40"
+    });
     RESSEND(res, {
       statusCode,
       statusText,
-      quickbooks_token
+      quickbooks_token,
+      accounts,
+      vendors,
+      customers
     });
   })
   .post("/list", async (req, res) => {
