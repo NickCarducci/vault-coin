@@ -69,7 +69,8 @@ const {
   defaultAuth = getAuth(this.firebaseAoo);
   defaultAuth = deleteUser(this.firebaseAoo);
 }*/
-const firestore = getFirestore(FIREBASEADMIN),
+const OAuthClient = require("intuit-oauth"),
+  firestore = getFirestore(FIREBASEADMIN),
   { getAuth, deleteUser } = require("firebase-admin/auth"),
   port = 8080,
   allowedOrigins = [
@@ -472,6 +473,40 @@ var lastLink; //function (){}//need a "function" not fat scope to hoist a promis
       .catch((e) => standardCatch(res, e, newPay, "create " + name));*/
   };
 attach
+  .post("/quickbooks", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+
+    const oauthClient = new OAuthClient({
+      clientId: process.env.QBA_ID,
+      clientSecret: process.env.QBA_SECRET,
+      environment: "production",
+      redirectUri: "https://scopes.cc"
+    });
+
+    var authUri = oauthClient.authorizeUri({
+      scope: [OAuthClient.scopes.Accounting],
+      state: "intuit-test"
+    });
+    //res.send(authUri);
+    if (!authUri)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go paymentMethods list"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      authUri,
+      oauthClient
+    });
+  })
   .post("/list", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
