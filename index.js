@@ -495,13 +495,8 @@ attach
         statusText,
         error: "no go oauthClient new"
       });
-    RESSEND(res, {
-      statusCode,
-      statusText,
-      oauthClient
-    });
     var authUri = oauthClient.authorizeUri({
-      scope: [OAuthClient.scopes.Accounting],
+      scope: [], //[OAuthClient.scopes.Accounting],
       state: "intuit-test"
     });
     //res.send(authUri);
