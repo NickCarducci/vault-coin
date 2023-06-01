@@ -490,6 +490,12 @@ attach
       logging: true
     });
 
+    RESSEND(res, {
+      statusCode,
+      statusText,
+
+      oauthClient
+    });
     if (!oauthClient)
       return RESSEND(res, {
         statusCode,
