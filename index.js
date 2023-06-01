@@ -534,7 +534,7 @@ attach
         statusText,
         error: "no go oauthClient new"
       });
-    const authResponse = oauthClient.createToken(req.body.url);
+    const authResponse = await oauthClient.createToken(req.body.url);
 
     if (!authResponse)
       return RESSEND(res, {
