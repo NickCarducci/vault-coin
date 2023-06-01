@@ -559,7 +559,7 @@ attach
 
     const selectAccount =
       "select * from Account where Metadata.CreateTime > '2014-12-31'";
-    const accounts = oauthClient.makeApiCall({
+    const accounts = await oauthClient.makeApiCall({
       url:
         url +
         "v3/company/" +
@@ -568,9 +568,15 @@ attach
         selectAccount +
         "&minorversion=40"
     });
+    if (!accounts)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go accounts by oauth"
+      });
     const selectVendor =
       "select * from Account where Metadata.CreateTime > '2014-12-31'";
-    const vendors = oauthClient.makeApiCall({
+    const vendors = await oauthClient.makeApiCall({
       url:
         url +
         "v3/company/" +
@@ -579,9 +585,15 @@ attach
         selectVendor +
         "&minorversion=40"
     });
+    if (!vendors)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go vendors by oauth"
+      });
     const selectCustomer =
       "select * from Account where Metadata.CreateTime > '2014-12-31'";
-    const customers = oauthClient.makeApiCall({
+    const customers = await oauthClient.makeApiCall({
       url:
         url +
         "v3/company/" +
@@ -590,6 +602,12 @@ attach
         selectCustomer +
         "&minorversion=40"
     });
+    if (!customers)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go customers by oauth"
+      });
     RESSEND(res, {
       statusCode,
       statusText,
