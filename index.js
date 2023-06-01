@@ -496,7 +496,7 @@ attach
         error: "no go oauthClient new"
       });
     var authUri = oauthClient.authorizeUri({
-      scope: [], //[OAuthClient.scopes.Accounting],
+      scope: [OAuthClient.scopes.Accounting],
       state: "intuit-test"
     });
     //res.send(authUri);
