@@ -513,6 +513,48 @@ attach
       oauthClient
     });
   })
+  .post("/quickbookscallback", async (req, res) => {
+    var origin = refererOrigin(req, res);
+    if (!req.body || allowOriginType(origin, res))
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        progress: "yet to surname factor digit counts.."
+      });
+    const oauthClient = new OAuthClient({
+      clientId: process.env.QBA_ID,
+      clientSecret: process.env.QBA_SECRET,
+      environment: "sandbox",
+      redirectUri: origin //"https://scopes.cc"
+      //logging: true
+    });
+    if (!oauthClient.authorizeUri)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go oauthClient new"
+      });
+    const authResponse = oauthClient.createToken(req.body.url);
+
+    if (!authResponse)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go authResponse by oauth"
+      });
+    const quickbooks_token = JSON.stringify(authResponse.getJson(), null, 2);
+    if (!quickbooks_token)
+      return RESSEND(res, {
+        statusCode,
+        statusText,
+        error: "no go authUri by oauth"
+      });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      quickbooks_token
+    });
+  })
   .post("/list", async (req, res) => {
     var origin = refererOrigin(req, res);
     if (!req.body || allowOriginType(origin, res))
