@@ -77,7 +77,8 @@ const OAuthClient = require("intuit-oauth"),
     "https://sausage.saltbank.org",
     "https://i7l8qe.csb.app",
     "https://vau.money",
-    "https://jwi5k.csb.app"
+    "https://jwi5k.csb.app",
+    "https://se1dt7.csb.app"
   ], //Origin: <scheme>://<hostname>:<port>
   RESSEND = (res, e) => {
     res.send(e);
@@ -481,25 +482,12 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
-    RESSEND(res, {
-      statusCode,
-      statusText,
-
-      data: "node fine"
-    });
     const oauthClient = new OAuthClient({
       clientId: process.env.QBA_ID,
       clientSecret: process.env.QBA_SECRET,
       environment: "sandbox",
       redirectUri: "https://scopes.cc",
       logging: true
-    });
-
-    RESSEND(res, {
-      statusCode,
-      statusText,
-
-      oauthClient
     });
     if (!oauthClient)
       return RESSEND(res, {
