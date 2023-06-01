@@ -486,15 +486,20 @@ attach
       clientId: process.env.QBA_ID,
       clientSecret: process.env.QBA_SECRET,
       environment: "sandbox",
-      redirectUri: "https://scopes.cc",
-      logging: true
+      redirectUri: "https://scopes.cc"
+      //logging: true
     });
-    if (!oauthClient)
+    if (!oauthClient.authorizeUri)
       return RESSEND(res, {
         statusCode,
         statusText,
         error: "no go oauthClient new"
       });
+    RESSEND(res, {
+      statusCode,
+      statusText,
+      oauthClient
+    });
     var authUri = oauthClient.authorizeUri({
       scope: [OAuthClient.scopes.Accounting],
       state: "intuit-test"
