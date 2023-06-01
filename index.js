@@ -481,7 +481,12 @@ attach
         statusText,
         progress: "yet to surname factor digit counts.."
       });
+    RESSEND(res, {
+      statusCode,
+      statusText,
 
+      data: "node fine"
+    });
     const oauthClient = new OAuthClient({
       clientId: process.env.QBA_ID,
       clientSecret: process.env.QBA_SECRET,
