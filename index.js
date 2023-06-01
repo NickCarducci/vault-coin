@@ -485,7 +485,7 @@ attach
     const oauthClient = new OAuthClient({
       clientId: process.env.QBA_ID,
       clientSecret: process.env.QBA_SECRET,
-      environment: "production",
+      environment: "sandbox",
       redirectUri: "https://scopes.cc",
       logging: true
     });
