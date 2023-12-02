@@ -74,6 +74,7 @@ const OAuthClient = require("intuit-oauth"),
   { getAuth, deleteUser } = require("firebase-admin/auth"),
   port = 8080,
   allowedOrigins = [
+    "https://yktgvd.csb.app",
     "https://sausage.saltbank.org",
     "https://i7l8qe.csb.app",
     "https://vau.money",
